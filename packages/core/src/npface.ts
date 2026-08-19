@@ -143,16 +143,28 @@ export function resolveDef(def: StateDef, registry: Record<string, StateDef>, de
 }
 
 /** Canonical state name for `name` (alias-aware); unknown names fall back to `idle`. */
+/** `searchDocs`, `search_docs`, `Search Docs` → `search-docs`. */
+export function normalizeStateName(name: string): string {
+  return (name || '')
+    .trim()
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .replace(/[\s_]+/g, '-')
+    .toLowerCase();
+}
+
+/** Canonical state name for `name` (alias- and case-insensitive); unknown names fall back to `idle`. */
 export function resolveStateName(
   name: string,
   registry: Record<string, StateDef> = STATES,
 ): string {
-  const n = (name || '').trim();
+  const raw = (name || '').trim();
+  if (registry[raw]) return raw;
+  const n = normalizeStateName(raw);
   if (registry[n]) return n;
-  const a = ALIASES[n] ?? ALIASES[n.toLowerCase()];
+  const compact = n.replace(/-/g, '');
+  const a = ALIASES[n] ?? ALIASES[compact];
   if (a && registry[a]) return a;
-  const lower = n.toLowerCase();
-  if (registry[lower]) return lower;
+  for (const k in registry) if (k.replace(/-/g, '') === compact) return k;
   return 'idle';
 }
 

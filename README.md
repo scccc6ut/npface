@@ -26,15 +26,15 @@
 
 ### What is it?
 
-`npface` renders a small helmet-shaped face — deep-navy rounded helmet, white visor slot, two neon-green rounded-square eyes (the npcrew brand mark) — and makes it **emote**. Expressions come entirely from the two eyes, the visor and tiny helmet motions: blinks, squint-smiles, wide eyes, side glances, sleepy half-lids, a "searching" circle, dizzy X-eyes, z z z, nods, head tilts, breathing.
+`npface` renders a small helmet-shaped face — a deep-navy rounded square helmet, white visor slot, two neon-green rounded-square eyes (the npcrew brand mark, flat 2D) — and makes it **emote**. Expressions come entirely from the two eyes, the visor and tiny helmet motions: blinks, squint-smiles, wide eyes, side glances, sleepy half-lids, reading saccades, a radar-like "searching" circle, dizzy X-eyes, z z z, nods, head tilts, breathing.
 
 Give it a **semantic state name** and it takes care of the rest:
 
 ```ts
-face.set('thinking'); // → idle → thinking → searching → working → proud …
+face.set('thinking'); // → idle → thinking → search-docs → search-web → working → proud …
 ```
 
-- **12 states**: `sleep · wake · idle · blink · happy · proud (complete) · thinking · searching · working · waiting · error (dizzy) · sad (tired)` — plus aliases, unknown names fall back to `idle`, and you can register your own.
+- **13 states**: `sleep · wake · idle · blink · happy · proud (complete) · thinking · search-docs · search-web · working · waiting · error (dizzy) · sad (tired)` — plus aliases (`searching`, `rag`, `browsing`, `tired` …; `searchDocs` / `search_docs` are normalised too), unknown names fall back to `idle`, and you can register your own.
 - **Zero dependencies**, framework-agnostic core (plain SVG/DOM, built-in springs & easing, one shared `requestAnimationFrame` loop). **~9 KB gzip.**
 - **React bindings** (`npface-react`): `<Npface state="working" />`. Vue can follow.
 - **Alive by default**: breathing, random glances, auto-blink, per-state rhythm; optional **eyes-follow-pointer**.
@@ -136,20 +136,21 @@ Also exported: `STATES`, `STATE_NAMES`, `ALIASES`, `registerState(name, def)`, `
 
 ### States
 
-| state       | look                                                  | meaning               | notes                                                     |
-| ----------- | ----------------------------------------------------- | --------------------- | --------------------------------------------------------- |
-| `idle`      | <img src="./assets/states/idle.svg" width="72"/>      | resting               | breathing, random glances, auto-blink                     |
-| `blink`     | <img src="./assets/states/blink.svg" width="72"/>     | automatic             | `pulse('blink')` / `blink()` for a manual one             |
-| `happy`     | <img src="./assets/states/happy.svg" width="72"/>     | pleased               | smile arches + a bounce; good as a pulse                  |
-| `proud`     | <img src="./assets/states/proud.svg" width="72"/>     | task complete         | alias `complete`, `done`, `success`; chin up + nod; pulse |
-| `thinking`  | <img src="./assets/states/thinking.svg" width="72"/>  | reasoning             | eyes up, head tilt, drifting glances                      |
-| `searching` | <img src="./assets/states/searching.svg" width="72"/> | retrieving / browsing | round eyes circling                                       |
-| `working`   | <img src="./assets/states/working.svg" width="72"/>   | executing             | focused narrow eyes scanning lines; alias `busy`          |
-| `waiting`   | <img src="./assets/states/waiting.svg" width="72"/>   | needs your input      | head cocked, one eye raised; alias `ask`, `question`      |
-| `error`     | <img src="./assets/states/error.svg" width="72"/>     | failure / dizzy       | X eyes, wobble; alias `dizzy`, `fail`; pulse              |
-| `sad`       | <img src="./assets/states/sad.svg" width="72"/>       | tired / down          | droopy lids, head low; alias `tired`                      |
-| `sleep`     | <img src="./assets/states/sleep.svg" width="72"/>     | offline / paused      | closed eyes, slow breath, z z z                           |
-| `wake`      | <img src="./assets/states/wake.svg" width="72"/>      | coming online         | eyes pop open, stretch, then auto → `idle`                |
+| state         | look                                                    | meaning                                           | notes                                                                                              |
+| ------------- | ------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `idle`        | <img src="./assets/states/idle.svg" width="72"/>        | resting                                           | breathing, random glances, auto-blink                                                              |
+| `blink`       | <img src="./assets/states/blink.svg" width="72"/>       | automatic                                         | `pulse('blink')` / `blink()` for a manual one                                                      |
+| `happy`       | <img src="./assets/states/happy.svg" width="72"/>       | pleased                                           | smile arches + a bounce; good as a pulse                                                           |
+| `proud`       | <img src="./assets/states/proud.svg" width="72"/>       | task complete                                     | alias `complete`, `done`, `success`; chin up + nod; pulse                                          |
+| `thinking`    | <img src="./assets/states/thinking.svg" width="72"/>    | reasoning                                         | eyes up, head tilt, drifting glances                                                               |
+| `search-docs` | <img src="./assets/states/search-docs.svg" width="72"/> | retrieving documents (RAG, files, knowledge base) | reading saccades line by line, flick to the next page; alias `rag`, `reading`, `retrieval`, `docs` |
+| `search-web`  | <img src="./assets/states/search-web.svg" width="72"/>  | web / internet search                             | round eyes circling like a radar sweep; alias `searching`, `search`, `browsing`, `web`             |
+| `working`     | <img src="./assets/states/working.svg" width="72"/>     | executing                                         | focused narrow eyes scanning lines; alias `busy`                                                   |
+| `waiting`     | <img src="./assets/states/waiting.svg" width="72"/>     | needs your input                                  | head cocked, one eye raised; alias `ask`, `question`                                               |
+| `error`       | <img src="./assets/states/error.svg" width="72"/>       | failure / dizzy                                   | X eyes, wobble; alias `dizzy`, `fail`; pulse                                                       |
+| `sad`         | <img src="./assets/states/sad.svg" width="72"/>         | tired / down                                      | droopy lids, head low; alias `tired`                                                               |
+| `sleep`       | <img src="./assets/states/sleep.svg" width="72"/>       | offline / paused                                  | closed eyes, slow breath, z z z                                                                    |
+| `wake`        | <img src="./assets/states/wake.svg" width="72"/>        | coming online                                     | eyes pop open, stretch, then auto → `idle`                                                         |
 
 The previews above are animated SVGs recorded from the engine itself (`pnpm assets`); see everything move in the [live demo](https://scccc6ut.github.io/npface/).
 
@@ -194,15 +195,15 @@ Motion primitives: `sine`, `sweep` (scan & flick back), `wander` (random walk), 
 The backend only needs to emit a **state name** alongside its usual events; no animation logic server-side.
 
 ```ts
-// SSE / WebSocket payload: { agentId: 'nova', status: 'searching' }
+// SSE / WebSocket payload: { agentId: 'nova', status: 'search-docs' }
 es.onmessage = (e) => {
   const { status, event } = JSON.parse(e.data);
   if (event === 'done') face.pulse('proud');
-  else face.set(status); // thinking | searching | working | waiting | error | idle …
+  else face.set(status); // thinking | search-docs | search-web | working | waiting | error | idle …
 };
 ```
 
-Suggested mapping: `planning → thinking`, `tool_call / retrieval → searching`, `generating → working`, `needs_input → waiting`, `error → error`, `finished → pulse('proud')`, `offline → sleep`, `online → wake`. Unknown names are safe (→ `idle`), so you can stream raw statuses and refine the mapping later.
+Suggested mapping: `planning → thinking`, `retrieval / RAG / file search → search-docs`, `web search / browsing → search-web`, `generating / tool_call → working`, `needs_input → waiting`, `error → error`, `finished → pulse('proud')`, `offline → sleep`, `online → wake`. Unknown names are safe (→ `idle`), so you can stream raw statuses and refine the mapping later. Names are normalised (`searchDocs`, `search_docs`, `SEARCH-DOCS` all work).
 
 ### Performance & accessibility
 
@@ -237,15 +238,15 @@ Inspired by the idea of state-driven expressive avatars popularised by projects 
 
 ### 这是什么？
 
-`npface` 渲染一个小小的头盔脸——深藏青圆角头盔、白色横向护目镜槽、两颗荧光绿圆角方形眼睛（npcrew 的品牌形象），并让它**会表情**。所有表情只靠两只眼睛、护目镜和头盔的小动作：眨眼、眯眼笑、圆睁、斜眼扫视、困倦半闭、"检索"转圈、晕眩 X 眼、zzz、点头、歪头、呼吸起伏。
+`npface` 渲染一个小小的头盔脸——深藏青圆角正方形头盔、白色横向护目镜槽、两颗荧光绿圆角方形眼睛（npcrew 的品牌形象，纯 2D 平面），并让它**会表情**。所有表情只靠两只眼睛、护目镜和头盔的小动作：眨眼、眯眼笑、圆睁、斜眼扫视、困倦半闭、逐行扫读、雷达式"检索"转圈、晕眩 X 眼、zzz、点头、歪头、呼吸起伏。
 
 你只需给它一个**语义状态名**，其余交给它：
 
 ```ts
-face.set('thinking'); // → idle → thinking → searching → working → proud …
+face.set('thinking'); // → idle → thinking → search-docs → search-web → working → proud …
 ```
 
-- **12 个状态**：`sleep · wake · idle · blink · happy · proud(complete) · thinking · searching · working · waiting · error(晕) · sad(tired)`，支持别名，未知状态自动回落 `idle`，也可以注册自定义状态。
+- **13 个状态**：`sleep · wake · idle · blink · happy · proud(complete) · thinking · search-docs(文档检索) · search-web(联网检索) · working · waiting · error(晕) · sad(tired)`，支持别名（`searching`、`rag`、`browsing`、`tired` …，`searchDocs` / `search_docs` 也会被归一化），未知状态自动回落 `idle`，也可以注册自定义状态。
 - **零依赖**、框架无关的核心（直接操作 SVG/DOM，内置弹簧与缓动，全页面共用一个 `requestAnimationFrame` 循环），**gzip 约 9 KB**。
 - **React 封装**（`npface-react`）：`<Npface state="working" />`，Vue 可后续补充。
 - **默认就是活的**：呼吸、随机扫视、自动眨眼、每个状态自带节奏；可选**眼睛跟随鼠标**。
@@ -347,20 +348,21 @@ export function Employee({ status }: { status: string }) {
 
 ### 状态表
 
-| 状态        | 样子                                                  | 含义         | 备注                                                   |
-| ----------- | ----------------------------------------------------- | ------------ | ------------------------------------------------------ |
-| `idle`      | <img src="./assets/states/idle.svg" width="72"/>      | 待机         | 呼吸、随机扫视、自动眨眼                               |
-| `blink`     | <img src="./assets/states/blink.svg" width="72"/>     | 眨眼（自动） | `pulse('blink')` / `blink()` 手动触发                  |
-| `happy`     | <img src="./assets/states/happy.svg" width="72"/>     | 开心         | 眯眼笑 + 弹跳；适合 pulse                              |
-| `proud`     | <img src="./assets/states/proud.svg" width="72"/>     | 完成 / 自豪  | 别名 `complete`、`done`、`success`；抬头 + 点头；pulse |
-| `thinking`  | <img src="./assets/states/thinking.svg" width="72"/>  | 思考         | 眼睛上望、歪头、游移                                   |
-| `searching` | <img src="./assets/states/searching.svg" width="72"/> | 检索 / 浏览  | 圆眼转圈                                               |
-| `working`   | <img src="./assets/states/working.svg" width="72"/>   | 执行中       | 眯眼专注、逐行扫读；别名 `busy`                        |
-| `waiting`   | <img src="./assets/states/waiting.svg" width="72"/>   | 等你答复     | 歪头疑问、一只眼睁大；别名 `ask`、`question`           |
-| `error`     | <img src="./assets/states/error.svg" width="72"/>     | 出错 / 晕    | X 眼晃悠；别名 `dizzy`、`fail`；pulse                  |
-| `sad`       | <img src="./assets/states/sad.svg" width="72"/>       | 难过 / 疲惫  | 眼皮下垂、低头；别名 `tired`                           |
-| `sleep`     | <img src="./assets/states/sleep.svg" width="72"/>     | 离线 / 暂停  | 闭眼慢呼吸、zzz                                        |
-| `wake`      | <img src="./assets/states/wake.svg" width="72"/>      | 上线         | 睁眼、伸展，然后自动 → `idle`                          |
+| 状态          | 样子                                                    | 含义                            | 备注                                                               |
+| ------------- | ------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------ |
+| `idle`        | <img src="./assets/states/idle.svg" width="72"/>        | 待机                            | 呼吸、随机扫视、自动眨眼                                           |
+| `blink`       | <img src="./assets/states/blink.svg" width="72"/>       | 眨眼（自动）                    | `pulse('blink')` / `blink()` 手动触发                              |
+| `happy`       | <img src="./assets/states/happy.svg" width="72"/>       | 开心                            | 眯眼笑 + 弹跳；适合 pulse                                          |
+| `proud`       | <img src="./assets/states/proud.svg" width="72"/>       | 完成 / 自豪                     | 别名 `complete`、`done`、`success`；抬头 + 点头；pulse             |
+| `thinking`    | <img src="./assets/states/thinking.svg" width="72"/>    | 思考                            | 眼睛上望、歪头、游移                                               |
+| `search-docs` | <img src="./assets/states/search-docs.svg" width="72"/> | 文档检索（RAG / 文件 / 知识库） | 逐行快速扫读、翻页一闪；别名 `rag`、`reading`、`retrieval`、`docs` |
+| `search-web`  | <img src="./assets/states/search-web.svg" width="72"/>  | 联网检索                        | 圆眼像雷达一样转圈；别名 `searching`、`search`、`browsing`、`web`  |
+| `working`     | <img src="./assets/states/working.svg" width="72"/>     | 执行中                          | 眯眼专注、逐行扫读；别名 `busy`                                    |
+| `waiting`     | <img src="./assets/states/waiting.svg" width="72"/>     | 等你答复                        | 歪头疑问、一只眼睁大；别名 `ask`、`question`                       |
+| `error`       | <img src="./assets/states/error.svg" width="72"/>       | 出错 / 晕                       | X 眼晃悠；别名 `dizzy`、`fail`；pulse                              |
+| `sad`         | <img src="./assets/states/sad.svg" width="72"/>         | 难过 / 疲惫                     | 眼皮下垂、低头；别名 `tired`                                       |
+| `sleep`       | <img src="./assets/states/sleep.svg" width="72"/>       | 离线 / 暂停                     | 闭眼慢呼吸、zzz                                                    |
+| `wake`        | <img src="./assets/states/wake.svg" width="72"/>        | 上线                            | 睁眼、伸展，然后自动 → `idle`                                      |
 
 上表预览是用引擎本身录制的动态 SVG（`pnpm assets`）；完整效果见[在线演示](https://scccc6ut.github.io/npface/)。
 
@@ -405,15 +407,15 @@ face.set('love');
 后端只需要在原有事件里带上一个**状态名**，不需要任何动画逻辑。
 
 ```ts
-// SSE / WebSocket 载荷：{ agentId: 'nova', status: 'searching' }
+// SSE / WebSocket 载荷：{ agentId: 'nova', status: 'search-docs' }
 es.onmessage = (e) => {
   const { status, event } = JSON.parse(e.data);
   if (event === 'done') face.pulse('proud');
-  else face.set(status); // thinking | searching | working | waiting | error | idle …
+  else face.set(status); // thinking | search-docs | search-web | working | waiting | error | idle …
 };
 ```
 
-建议映射：`planning → thinking`、`tool_call / retrieval → searching`、`generating → working`、`needs_input → waiting`、`error → error`、`finished → pulse('proud')`、`offline → sleep`、`online → wake`。未知名称是安全的（→ `idle`），可以先直接透传原始状态，之后再细化映射。
+建议映射：`planning → thinking`、`检索 / RAG / 文件搜索 → search-docs`、`联网搜索 / 浏览 → search-web`、`generating / tool_call → working`、`needs_input → waiting`、`error → error`、`finished → pulse('proud')`、`offline → sleep`、`online → wake`。未知名称是安全的（→ `idle`），可以先直接透传原始状态，之后再细化映射。名称会被归一化（`searchDocs`、`search_docs`、`SEARCH-DOCS` 都可以）。
 
 ### 性能与无障碍
 

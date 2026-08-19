@@ -39,6 +39,13 @@ describe('state data', () => {
   it('resolves names, aliases, case and unknowns', () => {
     expect(resolveStateName('thinking')).toBe('thinking');
     expect(resolveStateName('complete')).toBe('proud');
+    expect(resolveStateName('searching')).toBe('search-web');
+    expect(resolveStateName('search-docs')).toBe('search-docs');
+    expect(resolveStateName('searchDocs')).toBe('search-docs');
+    expect(resolveStateName('search_web')).toBe('search-web');
+    expect(resolveStateName('Search Web')).toBe('search-web');
+    expect(resolveStateName('rag')).toBe('search-docs');
+    expect(resolveStateName('browsing')).toBe('search-web');
     expect(resolveStateName('Tired')).toBe('sad');
     expect(resolveStateName('WORKING')).toBe('working');
     expect(resolveStateName('nope')).toBe('idle');

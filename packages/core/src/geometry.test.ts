@@ -13,7 +13,7 @@ describe('geometry', () => {
   it('builds a closed helmet path with arcs', () => {
     expect(HELMET_PATH.startsWith('M')).toBe(true);
     expect(HELMET_PATH.endsWith('Z')).toBe(true);
-    expect((HELMET_PATH.match(/A/g) ?? []).length).toBe(5);
+    expect((HELMET_PATH.match(/A/g) ?? []).length).toBe(4);
   });
 
   it('roundedPolygon handles a square', () => {

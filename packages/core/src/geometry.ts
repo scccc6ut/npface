@@ -1,24 +1,17 @@
 /**
- * npface geometry — all original. The helmet silhouette echoes the npcrew logo
- * (a leaning, rounded helmet with a chamfered top-right corner, a stadium-shaped visor slot and
- * two rounded-square eyes). Eyes are generated procedurally from `EyeShape` parameters.
+ * npface geometry — all original. The helmet is a rounded square with a stadium-shaped visor slot
+ * and two rounded-square eyes (the npcrew mark). Eyes are generated procedurally from `EyeShape`
+ * parameters. Flat, 2D — like the brand mark.
  */
 import type { EyeShape } from './types';
 
 /** ViewBox edge length. */
 export const VIEW = 100;
 
-/** Helmet silhouette: [x, y, cornerRadius] clockwise from the top-left. */
-const HELMET_VERTS: [number, number, number][] = [
-  [10, 5, 12], // top-left
-  [74, 5, 6], // end of top edge, start of chamfer
-  [95, 26, 6], // end of chamfer
-  [95, 95, 14], // bottom-right
-  [4, 95, 11], // bottom-left
-];
-
-/** Visor slot (stadium). */
-export const VISOR = { x: 11, y: 36, w: 76, h: 24 };
+/** Helmet body: a symmetric rounded square (no chamfer, no lean). */
+export const HELMET = { x: 6, y: 6, w: 88, h: 88, r: 17 };
+/** Visor slot (stadium), centred. */
+export const VISOR = { x: 12, y: 36, w: 76, h: 24 };
 /** Home position of the eye centres. */
 export const EYE_HOME: [[number, number], [number, number]] = [
   [32, 48],
@@ -69,7 +62,17 @@ export function roundedPolygon(verts: [number, number, number][]): string {
   return d + 'Z';
 }
 
-export const HELMET_PATH = roundedPolygon(HELMET_VERTS);
+/** Rounded-rect path helper. */
+export function roundedRectPath(x: number, y: number, w: number, h: number, r: number): string {
+  return roundedPolygon([
+    [x, y, r],
+    [x + w, y, r],
+    [x + w, y + h, r],
+    [x, y + h, r],
+  ]);
+}
+
+export const HELMET_PATH = roundedRectPath(HELMET.x, HELMET.y, HELMET.w, HELMET.h, HELMET.r);
 
 /* ---------------- eyes ---------------- */
 

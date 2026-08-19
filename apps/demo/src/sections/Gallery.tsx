@@ -73,8 +73,8 @@ export function Gallery({
   onPick: (s: string) => void;
 }) {
   return (
-    <Section id="states" title={`${t.gallery} · 12`} body={t.galleryBody}>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+    <Section id="states" title={`${t.gallery} · ${STATE_META.length}`} body={t.galleryBody}>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {STATE_META.map((m) => (
           <Card key={m.name} name={m.name} lang={lang} t={t} onPick={onPick} />
         ))}

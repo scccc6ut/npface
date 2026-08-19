@@ -32,12 +32,18 @@ function poseFor(name) {
     head = { ...head, ...st.head };
   }
   // a touch of the state's motion so the snapshot is not dead-centred
-  if (name === 'searching') {
+  if (name === 'search-web') {
     l.x += 4;
     r.x += 4;
     l.y += 2;
     r.y += 2;
     head.rot += 1.5;
+  }
+  if (name === 'search-docs') {
+    l.x += -3;
+    r.x += -3;
+    l.y += 1;
+    r.y += 1;
   }
   if (name === 'working') {
     l.x += -2.5;
@@ -82,7 +88,7 @@ function faceSvg(name, { size = 120, bg = true, blink = 0 } = {}) {
 
 // banner: all states in a row (no individual backgrounds)
 const names = STATE_NAMES;
-const cell = 100;
+const cell = 96;
 const W = names.length * cell + 40;
 const H = 170;
 let inner = '';

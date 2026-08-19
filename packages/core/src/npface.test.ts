@@ -1,8 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createNpface } from './npface';
 import { registerState } from './index';
+import type { Npface } from './types';
 
 let container: HTMLDivElement;
+const made: Npface[] = [];
+const make = (opts?: Parameters<typeof createNpface>[1]) => {
+  const f = createNpface(container, opts);
+  made.push(f);
+  return f;
+};
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -14,6 +21,7 @@ beforeEach(() => {
   document.body.appendChild(container);
 });
 afterEach(() => {
+  for (const f of made.splice(0)) f.destroy();
   container.remove();
   vi.restoreAllMocks();
   vi.useRealTimers();
@@ -21,7 +29,7 @@ afterEach(() => {
 
 describe('createNpface', () => {
   it('renders an svg with helmet, visor and two eyes', () => {
-    const face = createNpface(container, { state: 'idle', size: 64 });
+    const face = make({ state: 'idle', size: 64 });
     const svg = container.querySelector('svg')!;
     expect(svg).toBeTruthy();
     expect(svg.getAttribute('width')).toBe('64');
@@ -37,7 +45,7 @@ describe('createNpface', () => {
 
   it('switches states, resolves aliases and falls back to idle', () => {
     const seen: string[] = [];
-    const face = createNpface(container, { onChange: (s) => seen.push(s) });
+    const face = make({ onChange: (s) => seen.push(s) });
     face.set('thinking');
     expect(face.state).toBe('thinking');
     face.set('complete');
@@ -50,7 +58,7 @@ describe('createNpface', () => {
   });
 
   it('pulse plays a state and returns to the previous one', () => {
-    const face = createNpface(container, { state: 'working' });
+    const face = make({ state: 'working' });
     face.pulse('proud', 500);
     expect(face.state).toBe('proud');
     vi.advanceTimersByTime(600);
@@ -59,16 +67,16 @@ describe('createNpface', () => {
   });
 
   it('set() during a pulse cancels the return', () => {
-    const face = createNpface(container, { state: 'idle' });
+    const face = make({ state: 'idle' });
     face.pulse('error', 500);
-    face.set('searching');
+    face.set('searching'); // alias of search-web
     vi.advanceTimersByTime(700);
-    expect(face.state).toBe('searching');
+    expect(face.state).toBe('search-web');
     face.destroy();
   });
 
   it('auto-transitions wake → idle', () => {
-    const face = createNpface(container, { state: 'wake' });
+    const face = make({ state: 'wake' });
     expect(face.state).toBe('wake');
     vi.advanceTimersByTime(1800);
     expect(face.state).toBe('idle');
@@ -76,7 +84,7 @@ describe('createNpface', () => {
   });
 
   it('applies colours, themes and sizes', () => {
-    const face = createNpface(container, {
+    const face = make({
       theme: 'dark',
       colors: { eye: '#ff0000' },
       size: '3rem',
@@ -96,7 +104,7 @@ describe('createNpface', () => {
 
   it('supports custom states and extends', () => {
     registerState('wink', { extends: 'happy', eyes: [{ lidT: 0.9 }, {}], pulse: 300 });
-    const face = createNpface(container, { states: { zen: { extends: 'sleep', zzz: false } } });
+    const face = make({ states: { zen: { extends: 'sleep', zzz: false } } });
     face.set('wink');
     expect(face.state).toBe('wink');
     face.set('zen');
@@ -105,7 +113,7 @@ describe('createNpface', () => {
   });
 
   it('reduced motion snaps quickly and never blinks', () => {
-    const face = createNpface(container, { reducedMotion: true, state: 'idle' });
+    const face = make({ reducedMotion: true, state: 'idle' });
     face.set('happy');
     vi.advanceTimersByTime(1000);
     const d1 = face.el.querySelector('.npface-eye-l')?.getAttribute('d');
@@ -116,7 +124,7 @@ describe('createNpface', () => {
   });
 
   it('sleep shows zzz and the dizzy state draws crosses', () => {
-    const face = createNpface(container, { state: 'sleep' });
+    const face = make({ state: 'sleep' });
     expect(face.el.querySelector('.npface-zzz')).toBeTruthy();
     face.set('error', { immediate: true });
     vi.advanceTimersByTime(50);

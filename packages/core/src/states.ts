@@ -134,14 +134,50 @@ export const STATES: Record<string, StateDef> = {
     ],
   },
 
-  searching: {
-    eye: { r: 0.85, w: 12.5, h: 12.5 },
+  /** 联网检索 — round eyes circling like a radar / globe scan, with a soft "ping" pulse. */
+  'search-web': {
+    eye: { r: 0.9, w: 12.5, h: 12.5 },
     blink: { every: [3000, 6000] },
     motions: [
-      { type: 'sine', target: 'eye.x', amp: 5.5, period: 1500, phase: 0.25 },
-      { type: 'sine', target: 'eye.y', amp: 3.5, period: 1500 },
-      { type: 'sine', target: 'head.rot', amp: 2.5, period: 1500, phase: 0.25 },
-      { type: 'sine', target: 'head.x', amp: 0.8, period: 1500, phase: 0.25 },
+      { type: 'sine', target: 'eye.x', amp: 5.5, period: 1600, phase: 0.25 },
+      { type: 'sine', target: 'eye.y', amp: 3.5, period: 1600 },
+      { type: 'sine', target: 'head.rot', amp: 2.5, period: 1600, phase: 0.25 },
+      { type: 'sine', target: 'head.x', amp: 0.8, period: 1600, phase: 0.25 },
+      { type: 'sine', target: 'eye.w', amp: 0.7, period: 3200 },
+      { type: 'sine', target: 'eye.h', amp: 0.7, period: 3200 },
+    ],
+  },
+
+  /** 文档检索 — reading: quick saccades across lines, a flick back to the top for the next page. */
+  'search-docs': {
+    eye: { w: 14, h: 12, lidT: 0.12, y: 1.5 },
+    head: { y: 1, rot: -3 },
+    spring: 'snappy',
+    blink: { every: [2800, 6000], double: 0.15 },
+    motions: [
+      {
+        type: 'keys',
+        target: 'eye.x',
+        values: [-5, -2.5, 0, 2.5, 5, -5, -2, 1, 4],
+        period: 2400,
+        spring: 'snappy',
+      },
+      {
+        type: 'keys',
+        target: 'eye.y',
+        values: [0, 1.2, 2.4, -0.6],
+        period: 4800,
+        spring: 'snappy',
+      },
+      { type: 'sine', target: 'head.y', amp: 0.5, period: 3000 },
+      {
+        type: 'glance',
+        every: [4000, 7000],
+        hold: [220, 380],
+        x: [-7, -6],
+        y: [-3, -2],
+        head: 0.3,
+      },
     ],
   },
 
@@ -231,7 +267,23 @@ export const ALIASES: Record<string, string> = {
   failed: 'error',
   confused: 'error',
   think: 'thinking',
-  search: 'searching',
+  search: 'search-web',
+  searching: 'search-web',
+  web: 'search-web',
+  websearch: 'search-web',
+  browsing: 'search-web',
+  browse: 'search-web',
+  internet: 'search-web',
+  online: 'search-web',
+  googling: 'search-web',
+  docs: 'search-docs',
+  docsearch: 'search-docs',
+  documents: 'search-docs',
+  reading: 'search-docs',
+  read: 'search-docs',
+  retrieval: 'search-docs',
+  retrieving: 'search-docs',
+  rag: 'search-docs',
   work: 'working',
   busy: 'working',
   wait: 'waiting',
@@ -244,7 +296,10 @@ export const ALIASES: Record<string, string> = {
   default: 'idle',
 };
 
-/** The built-in state names (blink is an auto overlay but addressable via set/pulse). */
+/**
+ * The built-in state names (blink is an auto overlay but addressable via set/pulse).
+ * `searching` / `search` are aliases of `search-web`; `searchDocs`, `search_docs` … normalise to `search-docs`.
+ */
 export const STATE_NAMES = [
   'sleep',
   'wake',
@@ -253,7 +308,8 @@ export const STATE_NAMES = [
   'happy',
   'proud',
   'thinking',
-  'searching',
+  'search-docs',
+  'search-web',
   'working',
   'waiting',
   'error',

@@ -66,12 +66,13 @@ export function Employee({ status }: { status: string }) {
 // { "agentId": "nova", "status": "searching" }
 // npface maps unknown names to "idle", and understands aliases:
 //   complete → proud · tired → sad · dizzy/fail → error · busy → working
+//   searching/browsing → search-web · rag/reading → search-docs (searchDocs, search_docs … also work)
 
 const es = new EventSource('/api/agents/nova/events');
 es.onmessage = (e) => {
   const { status, event } = JSON.parse(e.data);
   if (event === 'done') face.pulse('proud');   // one-shot celebration
-  else face.set(status);                      // thinking / searching / working / waiting …
+  else face.set(status);                      // thinking / search-docs / search-web / working / waiting …
 };`;
   return { vanilla, react, agent };
 }

@@ -13,7 +13,13 @@ const OK_RUN: Step[] = [
     en: 'Planning: break the request into steps',
     zh: '规划：把需求拆成步骤',
   },
-  { status: 'searching', ms: 2200, en: 'Searching the knowledge base', zh: '检索知识库' },
+  {
+    status: 'search-docs',
+    ms: 2000,
+    en: 'Retrieving from the knowledge base',
+    zh: '检索知识库文档',
+  },
+  { status: 'search-web', ms: 2000, en: 'Checking the web for fresh data', zh: '联网检索最新资料' },
   {
     status: 'working',
     ms: 2800,
@@ -36,7 +42,7 @@ const FAIL_RUN: Step[] = [
     zh: 'CRM 返回 500——准备重试',
     event: 'error',
   },
-  { status: 'searching', ms: 1800, en: 'Looking for a fallback endpoint', zh: '寻找备用接口' },
+  { status: 'search-web', ms: 1800, en: 'Looking for a fallback endpoint', zh: '联网寻找备用接口' },
   { status: 'working', ms: 1600, en: 'Retry succeeded', zh: '重试成功' },
   { status: 'happy', ms: 1800, en: 'Recovered ✓', zh: '已恢复 ✓', event: 'done' },
   { status: 'idle', ms: 0, en: 'Back to idle', zh: '回到待机' },

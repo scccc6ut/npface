@@ -28,10 +28,16 @@ globalThis.clearTimeout = (id) => {
 };
 let timers = [];
 const runTimers = () => {
-  for (const t of timers) if (t.fn && t.at <= clock) { const f = t.fn; t.fn = null; f(); }
+  for (const t of timers)
+    if (t.fn && t.at <= clock) {
+      const f = t.fn;
+      t.fn = null;
+      f();
+    }
 };
 
-const { createNpface, STATE_NAMES, VISOR, HELMET_PATH, LIGHT_COLORS, HEAD_PIVOT } = await import('../packages/core/dist/index.js');
+const { createNpface, STATE_NAMES, VISOR, HELMET_PATH, LIGHT_COLORS, HEAD_PIVOT } =
+  await import('../packages/core/dist/index.js');
 
 const FPS = 20;
 const SECONDS = 4;
@@ -74,11 +80,16 @@ function record(name) {
   timers = [];
   const host = document.createElement('div');
   document.body.appendChild(host);
-  const face = createNpface(host, { state: name === 'blink' ? 'idle' : name === 'wake' ? 'sleep' : name, pauseOffscreen: false, reducedMotion: false });
+  const face = createNpface(host, {
+    state: name === 'blink' ? 'idle' : name === 'wake' ? 'sleep' : name,
+    pauseOffscreen: false,
+    reducedMotion: false,
+  });
   const el = face.el;
   const q = (sel) => el.querySelector(sel);
   const head = q('.npface-head');
-  const eyeL = q('.npface-eye-l'), eyeR = q('.npface-eye-r');
+  const eyeL = q('.npface-eye-l'),
+    eyeR = q('.npface-eye-r');
   const [crossL, crossR] = el.querySelectorAll('.npface-cross');
 
   // choreography for the overlay-ish states
@@ -92,7 +103,20 @@ function record(name) {
     timers.push({ at: clock + 2600, fn: () => face.blink() });
   }
 
-  const S = { dL: [], dR: [], cL: [], cR: [], opL: [], opR: [], coL: [], coR: [], tr: [], rot: [], sc: [], z: [[], [], []] };
+  const S = {
+    dL: [],
+    dR: [],
+    cL: [],
+    cR: [],
+    opL: [],
+    opR: [],
+    coL: [],
+    coR: [],
+    tr: [],
+    rot: [],
+    sc: [],
+    z: [[], [], []],
+  };
   // warm-up so springs/sequences settle into the state (but keep entry choreography for wake/happy/proud)
   const warm = name === 'wake' || name === 'blink' ? 0 : 1200;
   const dt = 1 / FPS;
@@ -115,7 +139,8 @@ function record(name) {
     S.coL.push(crossL.getAttribute('opacity') ?? '0');
     S.coR.push(crossR.getAttribute('opacity') ?? '0');
     const t = head.getAttribute('transform') || '';
-    const m = /translate\(([-\d.]+) ([-\d.]+)\) rotate\(([-\d.]+)\) scale\(([-\d.]+) ([-\d.]+)\)/.exec(t);
+    const m =
+      /translate\(([-\d.]+) ([-\d.]+)\) rotate\(([-\d.]+)\) scale\(([-\d.]+) ([-\d.]+)\)/.exec(t);
     const [px, py] = HEAD_PIVOT;
     S.tr.push(m ? `${(+m[1] - px).toFixed(1)} ${(+m[2] - py).toFixed(1)}` : '0 0');
     S.rot.push(m ? `${(+m[3]).toFixed(1)} ${px} ${py}` : `0 ${px} ${py}`);
@@ -123,7 +148,16 @@ function record(name) {
     const zs = el.querySelectorAll('.npface-zzz text');
     for (let k = 0; k < 3; k++) {
       const z = zs[k];
-      S.z[k].push(z ? { x: z.getAttribute('x'), y: z.getAttribute('y'), fs: z.getAttribute('font-size'), op: z.getAttribute('opacity') } : { x: '0', y: '0', fs: '0', op: '0' });
+      S.z[k].push(
+        z
+          ? {
+              x: z.getAttribute('x'),
+              y: z.getAttribute('y'),
+              fs: z.getAttribute('font-size'),
+              op: z.getAttribute('opacity'),
+            }
+          : { x: '0', y: '0', fs: '0', op: '0' },
+      );
     }
   }
   face.destroy();
@@ -139,7 +173,19 @@ function record(name) {
       ? `<g font-family="ui-rounded, system-ui, sans-serif" font-weight="800" fill="${c.zzz}" text-anchor="middle">${S.z
           .map(
             (zs) =>
-              `<text x="${zs[0].x}" y="${zs[0].y}" font-size="${zs[0].fs}" opacity="${zs[0].op}">z${anim('x', zs.map((s) => s.x))}${anim('y', zs.map((s) => s.y))}${anim('font-size', zs.map((s) => s.fs))}${anim('opacity', zs.map((s) => s.op))}</text>`,
+              `<text x="${zs[0].x}" y="${zs[0].y}" font-size="${zs[0].fs}" opacity="${zs[0].op}">z${anim(
+                'x',
+                zs.map((s) => s.x),
+              )}${anim(
+                'y',
+                zs.map((s) => s.y),
+              )}${anim(
+                'font-size',
+                zs.map((s) => s.fs),
+              )}${anim(
+                'opacity',
+                zs.map((s) => s.op),
+              )}</text>`,
           )
           .join('')}</g>`
       : '';

@@ -5,7 +5,7 @@ export const UI = {
     tagline: 'Expression helmet · the AI-employee avatar that emotes',
     heroTitle: 'Give your AI employees a face that feels alive.',
     heroBody:
-      'npface is a tiny, zero-dependency SVG helmet avatar with 12 semantic states — idle, thinking, searching, working, waiting, proud, error… Springs, blinks, gaze and reduced-motion support built in. Your backend only returns a state name.',
+      'npface is a tiny, zero-dependency SVG helmet avatar with 13 semantic states — idle, thinking, search-docs, search-web, working, waiting, proud, error… Springs, blinks, gaze and reduced-motion support built in. Your backend only returns a state name.',
     install: 'Install',
     getStarted: 'Try it',
     gallery: 'States',
@@ -65,7 +65,7 @@ export const UI = {
     tagline: '表情头盔 · 会表情的 AI 员工头像',
     heroTitle: '让你的 AI 员工，有一张"活"的脸。',
     heroBody:
-      'npface 是一个零依赖的 SVG 头盔头像：12 个语义状态——待机、思考、检索、工作、等待、自豪、出错……内置弹簧动画、眨眼、视线跟随与 reduced-motion 支持。后端只需返回一个状态名。',
+      'npface 是一个零依赖的 SVG 头盔头像：13 个语义状态——待机、思考、文档检索、联网检索、工作、等待、自豪、出错……内置弹簧动画、眨眼、视线跟随与 reduced-motion 支持。后端只需返回一个状态名。',
     install: '安装',
     getStarted: '试一试',
     gallery: '状态一览',

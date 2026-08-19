@@ -2,6 +2,7 @@ export {
   createNpface,
   NpfaceInstance,
   resolveStateName,
+  normalizeStateName,
   resolveDef,
   PALETTE,
   LIGHT_COLORS,
@@ -11,6 +12,7 @@ export { STATES, ALIASES, STATE_NAMES, BASE_EYE, BASE_HEAD, DEFAULT_BLINK } from
 export type { StateName } from './states';
 export { SPRINGS, Spring, EASE } from './spring';
 export {
+  HELMET,
   HELMET_PATH,
   VISOR,
   EYE_HOME,
@@ -19,6 +21,7 @@ export {
   eyePath,
   crossPath,
   roundedPolygon,
+  roundedRectPath,
 } from './geometry';
 export { MotionLayer } from './motion';
 export type {
