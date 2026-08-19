@@ -53,7 +53,9 @@ run('pnpm size');
 
 // 4. publish
 for (const dir of pkgs) {
-  run(`pnpm publish --access public --no-git-checks --tag ${tag}${dry ? ' --dry-run' : ''}`, { cwd: resolve(dir) });
+  run(`pnpm publish --access public --no-git-checks --tag ${tag}${dry ? ' --dry-run' : ''}`, {
+    cwd: resolve(dir),
+  });
 }
 
 if (!dry) {

@@ -1,6 +1,14 @@
 import { useState } from 'react';
 
-export function CodeBlock({ code, copyLabel, copiedLabel }: { code: string; copyLabel: string; copiedLabel: string }) {
+export function CodeBlock({
+  code,
+  copyLabel,
+  copiedLabel,
+}: {
+  code: string;
+  copyLabel: string;
+  copiedLabel: string;
+}) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -13,7 +21,7 @@ export function CodeBlock({ code, copyLabel, copiedLabel }: { code: string; copy
   };
   return (
     <div className="relative">
-      <pre className="overflow-x-auto rounded-xl bg-navy p-4 font-mono text-[12.5px] leading-relaxed text-sand dark:bg-black/40">
+      <pre className="overflow-x-auto rounded-xl bg-navy p-4 pr-16 font-mono text-[12.5px] leading-relaxed text-sand dark:bg-black/40">
         <code>{code}</code>
       </pre>
       <button

@@ -94,7 +94,7 @@ export class MotionLayer {
         }
         case 'sweep': {
           const back = m.back ?? 0.2;
-          const u = ((t / m.period) % 1 + 1) % 1;
+          const u = (((t / m.period) % 1) + 1) % 1;
           const ease = EASE[m.ease ?? 'inOutSine'];
           const p = u < 1 - back ? ease(u / (1 - back)) : 1 - ease((u - (1 - back)) / back);
           addToPose(pose, m.target, (m.from + (m.to - m.from) * p) * w);

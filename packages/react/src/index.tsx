@@ -91,7 +91,14 @@ export const Npface = forwardRef<NpfaceHandle | null, NpfaceProps>(function Npfa
   useEffect(() => {
     changeRef.current = onStateChange;
   });
-  const initial = useRef({ state: state ?? emotion ?? 'idle', size, colors, theme, label, svgClassName });
+  const initial = useRef({
+    state: state ?? emotion ?? 'idle',
+    size,
+    colors,
+    theme,
+    label,
+    svgClassName,
+  });
   const following = follow ?? gaze ?? false;
 
   // mount / unmount (re-created when construction-only options change)
@@ -164,7 +171,9 @@ export const Npface = forwardRef<NpfaceHandle | null, NpfaceProps>(function Npfa
     if (face && label !== undefined) face.setLabel(label);
   }, [face, label]);
 
-  return <span ref={hostRef} style={style ? { ...wrapperStyle, ...style } : wrapperStyle} {...rest} />;
+  return (
+    <span ref={hostRef} style={style ? { ...wrapperStyle, ...style } : wrapperStyle} {...rest} />
+  );
 });
 
 /**

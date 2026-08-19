@@ -12,7 +12,8 @@ export const UI = {
     galleryBody:
       'Click any card to load it into the playground. Every expression is made of two eyes, the visor and a bit of helmet motion — nothing else.',
     playground: 'Playground',
-    playgroundBody: 'Mix states, colours, size, gaze and motion settings — copy the snippet when it looks right.',
+    playgroundBody:
+      'Mix states, colours, size, gaze and motion settings — copy the snippet when it looks right.',
     state: 'State',
     pulse: 'Pulse (one-shot)',
     size: 'Size',
@@ -68,7 +69,8 @@ export const UI = {
     install: '安装',
     getStarted: '试一试',
     gallery: '状态一览',
-    galleryBody: '点击任意卡片，把它载入下方的调试台。所有表情只靠两只眼睛、护目镜和头盔的小动作表达。',
+    galleryBody:
+      '点击任意卡片，把它载入下方的调试台。所有表情只靠两只眼睛、护目镜和头盔的小动作表达。',
     playground: '调试台',
     playgroundBody: '组合状态、配色、尺寸、视线与动效设置——满意后复制代码片段。',
     state: '状态',
@@ -91,7 +93,8 @@ export const UI = {
     copy: '复制',
     copied: '已复制！',
     agent: '接入 AI 代理',
-    agentBody: '后端每一步推送一个状态，前端直接映射成状态名。下面是一次模拟运行——左边是 JSON，右边是脸。',
+    agentBody:
+      '后端每一步推送一个状态，前端直接映射成状态名。下面是一次模拟运行——左边是 JSON，右边是脸。',
     run: '运行一个任务',
     runFail: '运行一个会失败的任务',
     running: '运行中…',

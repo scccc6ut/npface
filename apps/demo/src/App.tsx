@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { UI, type Lang } from './lib/i18n';
+import { ThemeCtx } from './lib/theme';
 import { Header } from './sections/Header';
 import { Hero } from './sections/Hero';
 import { Gallery } from './sections/Gallery';
@@ -52,23 +53,30 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen">
-      <Header t={t} lang={lang} setLang={setLang} dark={dark} setDark={setDark} />
-      <main>
-        <Hero t={t} lang={lang} />
-        <Gallery
-          t={t}
-          lang={lang}
-          onPick={(s) => {
-            setSelected(s === 'blink' ? 'idle' : s);
-            playgroundRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }}
-        />
-        <Playground t={t} selected={selected} setSelected={setSelected} sectionRef={playgroundRef} />
-        <AgentDemo t={t} lang={lang} />
-        <Crew t={t} />
-      </main>
-      <Footer t={t} />
-    </div>
+    <ThemeCtx.Provider value={dark ? 'dark' : 'light'}>
+      <div className="min-h-screen">
+        <Header t={t} lang={lang} setLang={setLang} dark={dark} setDark={setDark} />
+        <main>
+          <Hero t={t} lang={lang} />
+          <Gallery
+            t={t}
+            lang={lang}
+            onPick={(s) => {
+              setSelected(s === 'blink' ? 'idle' : s);
+              playgroundRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+          />
+          <Playground
+            t={t}
+            selected={selected}
+            setSelected={setSelected}
+            sectionRef={playgroundRef}
+          />
+          <AgentDemo t={t} lang={lang} />
+          <Crew t={t} />
+        </main>
+        <Footer t={t} />
+      </div>
+    </ThemeCtx.Provider>
   );
 }

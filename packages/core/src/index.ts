@@ -1,8 +1,25 @@
-export { createNpface, NpfaceInstance, resolveStateName, resolveDef, PALETTE, LIGHT_COLORS, DARK_COLORS } from './npface';
+export {
+  createNpface,
+  NpfaceInstance,
+  resolveStateName,
+  resolveDef,
+  PALETTE,
+  LIGHT_COLORS,
+  DARK_COLORS,
+} from './npface';
 export { STATES, ALIASES, STATE_NAMES, BASE_EYE, BASE_HEAD, DEFAULT_BLINK } from './states';
 export type { StateName } from './states';
 export { SPRINGS, Spring, EASE } from './spring';
-export { HELMET_PATH, VISOR, EYE_HOME, HEAD_PIVOT, VIEW, eyePath, crossPath, roundedPolygon } from './geometry';
+export {
+  HELMET_PATH,
+  VISOR,
+  EYE_HOME,
+  HEAD_PIVOT,
+  VIEW,
+  eyePath,
+  crossPath,
+  roundedPolygon,
+} from './geometry';
 export { MotionLayer } from './motion';
 export type {
   Npface,

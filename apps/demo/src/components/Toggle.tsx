@@ -1,4 +1,12 @@
-export function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+export function Toggle({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+}) {
   return (
     <label className="flex cursor-pointer items-center justify-between gap-3 text-sm">
       <span>{label}</span>

@@ -7,13 +7,28 @@ export function Footer({ t }: { t: UIStrings }) {
         <p>{t.footer}</p>
         <p className="mt-2 text-xs leading-relaxed opacity-80">{t.credits}</p>
         <div className="mt-3 flex flex-wrap gap-4 text-xs">
-          <a className="hover:underline" href="https://github.com/scccc6ut/npface" target="_blank" rel="noreferrer">
+          <a
+            className="hover:underline"
+            href="https://github.com/scccc6ut/npface"
+            target="_blank"
+            rel="noreferrer"
+          >
             GitHub
           </a>
-          <a className="hover:underline" href="https://www.npmjs.com/package/npface" target="_blank" rel="noreferrer">
+          <a
+            className="hover:underline"
+            href="https://www.npmjs.com/package/npface"
+            target="_blank"
+            rel="noreferrer"
+          >
             npm: npface
           </a>
-          <a className="hover:underline" href="https://www.npmjs.com/package/npface-react" target="_blank" rel="noreferrer">
+          <a
+            className="hover:underline"
+            href="https://www.npmjs.com/package/npface-react"
+            target="_blank"
+            rel="noreferrer"
+          >
             npm: npface-react
           </a>
           <span>MIT © 2026 npface contributors</span>

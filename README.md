@@ -31,7 +31,7 @@
 Give it a **semantic state name** and it takes care of the rest:
 
 ```ts
-face.set('thinking');   // → idle → thinking → searching → working → proud …
+face.set('thinking'); // → idle → thinking → searching → working → proud …
 ```
 
 - **12 states**: `sleep · wake · idle · blink · happy · proud (complete) · thinking · searching · working · waiting · error (dizzy) · sad (tired)` — plus aliases, unknown names fall back to `idle`, and you can register your own.
@@ -66,16 +66,16 @@ CDN / no build step:
 import { createNpface } from 'npface';
 
 const face = createNpface(document.querySelector('#avatar')!, {
-  state: 'idle',          // initial state (alias: emotion)
-  size: 48,               // px, or any CSS length string
+  state: 'idle', // initial state (alias: emotion)
+  size: 48, // px, or any CSS length string
   colors: { body: '#0f1d3a', visor: '#fff', eye: '#c7f636' },
-  follow: true,           // eyes follow the pointer (alias: gaze)
+  follow: true, // eyes follow the pointer (alias: gaze)
 });
 
-face.set('thinking');     // switch with a spring transition
-face.pulse('proud');      // play once, then fall back to the previous state
-face.pulse('blink');      // a single blink
-face.look(0.6, -0.3);     // look in a direction (-1..1); face.look(null) releases
+face.set('thinking'); // switch with a spring transition
+face.pulse('proud'); // play once, then fall back to the previous state
+face.pulse('blink'); // a single blink
+face.look(0.6, -0.3); // look in a direction (-1..1); face.look(null) releases
 face.follow(false);
 face.destroy();
 ```
@@ -104,52 +104,52 @@ export function Employee({ status }: { status: string }) {
 
 `target` is an element or CSS selector; the `<svg>` is appended to it.
 
-| option | type | default | description |
-| --- | --- | --- | --- |
-| `state` / `emotion` | `string` | `'idle'` | initial state (aliases ok, unknown → `idle`) |
-| `size` | `number \| string` | `48` | px or CSS length (`'100%'`, `'3rem'`) |
-| `colors` | `{ body, visor, eye, rim, zzz }` | brand palette | any subset; `rim` is an optional helmet outline |
-| `theme` | `'light' \| 'dark' \| 'auto'` | `'auto'` | picks the default palette (`auto` = `prefers-color-scheme`) |
-| `follow` / `gaze` | `boolean` | `false` | eyes (and a bit of head) follow the pointer |
-| `reducedMotion` | `boolean \| 'auto'` | `'auto'` | `auto` honours `prefers-reduced-motion`: no breathing / blink / gaze, quick critically-damped transitions |
-| `pauseOffscreen` | `boolean` | `true` | stop animating while out of view |
-| `label` | `string` | state name | `aria-label` |
-| `states` | `Record<string, StateDef>` | — | extra / overriding states for this instance |
-| `className` | `string` | — | extra classes on the `<svg>` |
-| `onChange` | `(state, prev) => void` | — | after every state change |
+| option              | type                             | default       | description                                                                                               |
+| ------------------- | -------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------- |
+| `state` / `emotion` | `string`                         | `'idle'`      | initial state (aliases ok, unknown → `idle`)                                                              |
+| `size`              | `number \| string`               | `48`          | px or CSS length (`'100%'`, `'3rem'`)                                                                     |
+| `colors`            | `{ body, visor, eye, rim, zzz }` | brand palette | any subset; `rim` is an optional helmet outline                                                           |
+| `theme`             | `'light' \| 'dark' \| 'auto'`    | `'auto'`      | picks the default palette (`auto` = `prefers-color-scheme`)                                               |
+| `follow` / `gaze`   | `boolean`                        | `false`       | eyes (and a bit of head) follow the pointer                                                               |
+| `reducedMotion`     | `boolean \| 'auto'`              | `'auto'`      | `auto` honours `prefers-reduced-motion`: no breathing / blink / gaze, quick critically-damped transitions |
+| `pauseOffscreen`    | `boolean`                        | `true`        | stop animating while out of view                                                                          |
+| `label`             | `string`                         | state name    | `aria-label`                                                                                              |
+| `states`            | `Record<string, StateDef>`       | —             | extra / overriding states for this instance                                                               |
+| `className`         | `string`                         | —             | extra classes on the `<svg>`                                                                              |
+| `onChange`          | `(state, prev) => void`          | —             | after every state change                                                                                  |
 
 #### Instance
 
-| member | description |
-| --- | --- |
-| `el` | the `<svg>` (`class="npface"`, `data-state="…"`) |
-| `state` | current state name |
-| `set(name, { immediate? })` | switch state; `immediate` snaps |
-| `pulse(name, ms?)` | play once then return (default duration per state, else 1500 ms) |
-| `blink()` | blink now |
-| `follow(on)` | pointer gaze on/off |
-| `look(x, y)` / `look(null)` | fixed gaze direction |
-| `setColors(partial)` · `setSize()` · `setTheme()` · `setLabel()` | runtime tweaks |
-| `destroy()` | stop & remove |
+| member                                                           | description                                                      |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `el`                                                             | the `<svg>` (`class="npface"`, `data-state="…"`)                 |
+| `state`                                                          | current state name                                               |
+| `set(name, { immediate? })`                                      | switch state; `immediate` snaps                                  |
+| `pulse(name, ms?)`                                               | play once then return (default duration per state, else 1500 ms) |
+| `blink()`                                                        | blink now                                                        |
+| `follow(on)`                                                     | pointer gaze on/off                                              |
+| `look(x, y)` / `look(null)`                                      | fixed gaze direction                                             |
+| `setColors(partial)` · `setSize()` · `setTheme()` · `setLabel()` | runtime tweaks                                                   |
+| `destroy()`                                                      | stop & remove                                                    |
 
 Also exported: `STATES`, `STATE_NAMES`, `ALIASES`, `registerState(name, def)`, `resolveStateName()`, `BASE_EYE`, `BASE_HEAD`, `SPRINGS`, `PALETTE`, `LIGHT_COLORS`, `DARK_COLORS`, and the geometry helpers (`HELMET_PATH`, `eyePath`, …) for static rendering.
 
 ### States
 
-| state | look | meaning | notes |
-| --- | --- | --- | --- |
-| `idle` | <img src="./assets/states/idle.svg" width="72"/> | resting | breathing, random glances, auto-blink |
-| `blink` | <img src="./assets/states/blink.svg" width="72"/> | automatic | `pulse('blink')` / `blink()` for a manual one |
-| `happy` | <img src="./assets/states/happy.svg" width="72"/> | pleased | smile arches + a bounce; good as a pulse |
-| `proud` | <img src="./assets/states/proud.svg" width="72"/> | task complete | alias `complete`, `done`, `success`; chin up + nod; pulse |
-| `thinking` | <img src="./assets/states/thinking.svg" width="72"/> | reasoning | eyes up, head tilt, drifting glances |
-| `searching` | <img src="./assets/states/searching.svg" width="72"/> | retrieving / browsing | round eyes circling |
-| `working` | <img src="./assets/states/working.svg" width="72"/> | executing | focused narrow eyes scanning lines; alias `busy` |
-| `waiting` | <img src="./assets/states/waiting.svg" width="72"/> | needs your input | head cocked, one eye raised; alias `ask`, `question` |
-| `error` | <img src="./assets/states/error.svg" width="72"/> | failure / dizzy | X eyes, wobble; alias `dizzy`, `fail`; pulse |
-| `sad` | <img src="./assets/states/sad.svg" width="72"/> | tired / down | droopy lids, head low; alias `tired` |
-| `sleep` | <img src="./assets/states/sleep.svg" width="72"/> | offline / paused | closed eyes, slow breath, z z z |
-| `wake` | <img src="./assets/states/wake.svg" width="72"/> | coming online | eyes pop open, stretch, then auto → `idle` |
+| state       | look                                                  | meaning               | notes                                                     |
+| ----------- | ----------------------------------------------------- | --------------------- | --------------------------------------------------------- |
+| `idle`      | <img src="./assets/states/idle.svg" width="72"/>      | resting               | breathing, random glances, auto-blink                     |
+| `blink`     | <img src="./assets/states/blink.svg" width="72"/>     | automatic             | `pulse('blink')` / `blink()` for a manual one             |
+| `happy`     | <img src="./assets/states/happy.svg" width="72"/>     | pleased               | smile arches + a bounce; good as a pulse                  |
+| `proud`     | <img src="./assets/states/proud.svg" width="72"/>     | task complete         | alias `complete`, `done`, `success`; chin up + nod; pulse |
+| `thinking`  | <img src="./assets/states/thinking.svg" width="72"/>  | reasoning             | eyes up, head tilt, drifting glances                      |
+| `searching` | <img src="./assets/states/searching.svg" width="72"/> | retrieving / browsing | round eyes circling                                       |
+| `working`   | <img src="./assets/states/working.svg" width="72"/>   | executing             | focused narrow eyes scanning lines; alias `busy`          |
+| `waiting`   | <img src="./assets/states/waiting.svg" width="72"/>   | needs your input      | head cocked, one eye raised; alias `ask`, `question`      |
+| `error`     | <img src="./assets/states/error.svg" width="72"/>     | failure / dizzy       | X eyes, wobble; alias `dizzy`, `fail`; pulse              |
+| `sad`       | <img src="./assets/states/sad.svg" width="72"/>       | tired / down          | droopy lids, head low; alias `tired`                      |
+| `sleep`     | <img src="./assets/states/sleep.svg" width="72"/>     | offline / paused      | closed eyes, slow breath, z z z                           |
+| `wake`      | <img src="./assets/states/wake.svg" width="72"/>      | coming online         | eyes pop open, stretch, then auto → `idle`                |
 
 See them move in the [live demo](https://scccc6ut.github.io/npface/).
 
@@ -176,7 +176,12 @@ registerState('love', {
   head: { y: -1 },
   spring: 'bouncy',
   motions: [{ type: 'sine', target: 'head.rot', amp: 3, period: 900 }],
-  sequence: { steps: [{ at: 0, head: { sy: 0.95 } }, { at: 150, head: { sy: 1 } }] },
+  sequence: {
+    steps: [
+      { at: 0, head: { sy: 0.95 } },
+      { at: 150, head: { sy: 1 } },
+    ],
+  },
 });
 
 face.set('love');
@@ -193,7 +198,7 @@ The backend only needs to emit a **state name** alongside its usual events; no a
 es.onmessage = (e) => {
   const { status, event } = JSON.parse(e.data);
   if (event === 'done') face.pulse('proud');
-  else face.set(status);          // thinking | searching | working | waiting | error | idle …
+  else face.set(status); // thinking | searching | working | waiting | error | idle …
 };
 ```
 
@@ -236,7 +241,7 @@ Inspired by the idea of state-driven expressive avatars popularised by projects 
 你只需给它一个**语义状态名**，其余交给它：
 
 ```ts
-face.set('thinking');   // → idle → thinking → searching → working → proud …
+face.set('thinking'); // → idle → thinking → searching → working → proud …
 ```
 
 - **12 个状态**：`sleep · wake · idle · blink · happy · proud(complete) · thinking · searching · working · waiting · error(晕) · sad(tired)`，支持别名，未知状态自动回落 `idle`，也可以注册自定义状态。
@@ -271,16 +276,16 @@ CDN 直接用：
 import { createNpface } from 'npface';
 
 const face = createNpface(document.querySelector('#avatar')!, {
-  state: 'idle',          // 初始状态（别名 emotion）
-  size: 48,               // 像素，或任意 CSS 长度字符串
+  state: 'idle', // 初始状态（别名 emotion）
+  size: 48, // 像素，或任意 CSS 长度字符串
   colors: { body: '#0f1d3a', visor: '#fff', eye: '#c7f636' },
-  follow: true,           // 眼睛跟随鼠标（别名 gaze）
+  follow: true, // 眼睛跟随鼠标（别名 gaze）
 });
 
-face.set('thinking');     // 切换状态（弹簧过渡）
-face.pulse('proud');      // 一次性表情，播完回落到之前的状态
-face.pulse('blink');      // 眨一下
-face.look(0.6, -0.3);     // 看向某个方向（-1..1）；face.look(null) 释放
+face.set('thinking'); // 切换状态（弹簧过渡）
+face.pulse('proud'); // 一次性表情，播完回落到之前的状态
+face.pulse('blink'); // 眨一下
+face.look(0.6, -0.3); // 看向某个方向（-1..1）；face.look(null) 释放
 face.follow(false);
 face.destroy();
 ```
@@ -309,52 +314,52 @@ export function Employee({ status }: { status: string }) {
 
 `target` 是元素或 CSS 选择器，`<svg>` 会被追加进去。
 
-| 选项 | 类型 | 默认 | 说明 |
-| --- | --- | --- | --- |
-| `state` / `emotion` | `string` | `'idle'` | 初始状态（支持别名，未知 → `idle`） |
-| `size` | `number \| string` | `48` | 像素或 CSS 长度（`'100%'`、`'3rem'`） |
-| `colors` | `{ body, visor, eye, rim, zzz }` | 品牌配色 | 任意子集；`rim` 为可选的头盔描边 |
-| `theme` | `'light' \| 'dark' \| 'auto'` | `'auto'` | 选择默认配色（`auto` 跟随 `prefers-color-scheme`） |
-| `follow` / `gaze` | `boolean` | `false` | 眼睛（带一点头部）跟随鼠标 |
-| `reducedMotion` | `boolean \| 'auto'` | `'auto'` | `auto` 尊重 `prefers-reduced-motion`：无呼吸/眨眼/跟随，快速临界阻尼过渡 |
-| `pauseOffscreen` | `boolean` | `true` | 离屏时停止动画 |
-| `label` | `string` | 状态名 | `aria-label` |
-| `states` | `Record<string, StateDef>` | — | 仅此实例生效的额外/覆盖状态 |
-| `className` | `string` | — | 加到 `<svg>` 上的类名 |
-| `onChange` | `(state, prev) => void` | — | 每次状态变化后回调 |
+| 选项                | 类型                             | 默认     | 说明                                                                     |
+| ------------------- | -------------------------------- | -------- | ------------------------------------------------------------------------ |
+| `state` / `emotion` | `string`                         | `'idle'` | 初始状态（支持别名，未知 → `idle`）                                      |
+| `size`              | `number \| string`               | `48`     | 像素或 CSS 长度（`'100%'`、`'3rem'`）                                    |
+| `colors`            | `{ body, visor, eye, rim, zzz }` | 品牌配色 | 任意子集；`rim` 为可选的头盔描边                                         |
+| `theme`             | `'light' \| 'dark' \| 'auto'`    | `'auto'` | 选择默认配色（`auto` 跟随 `prefers-color-scheme`）                       |
+| `follow` / `gaze`   | `boolean`                        | `false`  | 眼睛（带一点头部）跟随鼠标                                               |
+| `reducedMotion`     | `boolean \| 'auto'`              | `'auto'` | `auto` 尊重 `prefers-reduced-motion`：无呼吸/眨眼/跟随，快速临界阻尼过渡 |
+| `pauseOffscreen`    | `boolean`                        | `true`   | 离屏时停止动画                                                           |
+| `label`             | `string`                         | 状态名   | `aria-label`                                                             |
+| `states`            | `Record<string, StateDef>`       | —        | 仅此实例生效的额外/覆盖状态                                              |
+| `className`         | `string`                         | —        | 加到 `<svg>` 上的类名                                                    |
+| `onChange`          | `(state, prev) => void`          | —        | 每次状态变化后回调                                                       |
 
 #### 实例方法
 
-| 成员 | 说明 |
-| --- | --- |
-| `el` | `<svg>`（`class="npface"`，`data-state="…"`） |
-| `state` | 当前状态名 |
-| `set(name, { immediate? })` | 切换状态；`immediate` 直接跳转 |
-| `pulse(name, ms?)` | 播一次再回落（时长默认取状态定义，否则 1500 ms） |
-| `blink()` | 立即眨眼 |
-| `follow(on)` | 开关鼠标跟随 |
-| `look(x, y)` / `look(null)` | 固定视线方向 |
-| `setColors(partial)` · `setSize()` · `setTheme()` · `setLabel()` | 运行时调整 |
-| `destroy()` | 停止并移除 |
+| 成员                                                             | 说明                                             |
+| ---------------------------------------------------------------- | ------------------------------------------------ |
+| `el`                                                             | `<svg>`（`class="npface"`，`data-state="…"`）    |
+| `state`                                                          | 当前状态名                                       |
+| `set(name, { immediate? })`                                      | 切换状态；`immediate` 直接跳转                   |
+| `pulse(name, ms?)`                                               | 播一次再回落（时长默认取状态定义，否则 1500 ms） |
+| `blink()`                                                        | 立即眨眼                                         |
+| `follow(on)`                                                     | 开关鼠标跟随                                     |
+| `look(x, y)` / `look(null)`                                      | 固定视线方向                                     |
+| `setColors(partial)` · `setSize()` · `setTheme()` · `setLabel()` | 运行时调整                                       |
+| `destroy()`                                                      | 停止并移除                                       |
 
 同时导出：`STATES`、`STATE_NAMES`、`ALIASES`、`registerState(name, def)`、`resolveStateName()`、`BASE_EYE`、`BASE_HEAD`、`SPRINGS`、`PALETTE`、`LIGHT_COLORS`、`DARK_COLORS`，以及几何工具（`HELMET_PATH`、`eyePath` …）用于静态渲染。
 
 ### 状态表
 
-| 状态 | 样子 | 含义 | 备注 |
-| --- | --- | --- | --- |
-| `idle` | <img src="./assets/states/idle.svg" width="72"/> | 待机 | 呼吸、随机扫视、自动眨眼 |
-| `blink` | <img src="./assets/states/blink.svg" width="72"/> | 眨眼（自动） | `pulse('blink')` / `blink()` 手动触发 |
-| `happy` | <img src="./assets/states/happy.svg" width="72"/> | 开心 | 眯眼笑 + 弹跳；适合 pulse |
-| `proud` | <img src="./assets/states/proud.svg" width="72"/> | 完成 / 自豪 | 别名 `complete`、`done`、`success`；抬头 + 点头；pulse |
-| `thinking` | <img src="./assets/states/thinking.svg" width="72"/> | 思考 | 眼睛上望、歪头、游移 |
-| `searching` | <img src="./assets/states/searching.svg" width="72"/> | 检索 / 浏览 | 圆眼转圈 |
-| `working` | <img src="./assets/states/working.svg" width="72"/> | 执行中 | 眯眼专注、逐行扫读；别名 `busy` |
-| `waiting` | <img src="./assets/states/waiting.svg" width="72"/> | 等你答复 | 歪头疑问、一只眼睁大；别名 `ask`、`question` |
-| `error` | <img src="./assets/states/error.svg" width="72"/> | 出错 / 晕 | X 眼晃悠；别名 `dizzy`、`fail`；pulse |
-| `sad` | <img src="./assets/states/sad.svg" width="72"/> | 难过 / 疲惫 | 眼皮下垂、低头；别名 `tired` |
-| `sleep` | <img src="./assets/states/sleep.svg" width="72"/> | 离线 / 暂停 | 闭眼慢呼吸、zzz |
-| `wake` | <img src="./assets/states/wake.svg" width="72"/> | 上线 | 睁眼、伸展，然后自动 → `idle` |
+| 状态        | 样子                                                  | 含义         | 备注                                                   |
+| ----------- | ----------------------------------------------------- | ------------ | ------------------------------------------------------ |
+| `idle`      | <img src="./assets/states/idle.svg" width="72"/>      | 待机         | 呼吸、随机扫视、自动眨眼                               |
+| `blink`     | <img src="./assets/states/blink.svg" width="72"/>     | 眨眼（自动） | `pulse('blink')` / `blink()` 手动触发                  |
+| `happy`     | <img src="./assets/states/happy.svg" width="72"/>     | 开心         | 眯眼笑 + 弹跳；适合 pulse                              |
+| `proud`     | <img src="./assets/states/proud.svg" width="72"/>     | 完成 / 自豪  | 别名 `complete`、`done`、`success`；抬头 + 点头；pulse |
+| `thinking`  | <img src="./assets/states/thinking.svg" width="72"/>  | 思考         | 眼睛上望、歪头、游移                                   |
+| `searching` | <img src="./assets/states/searching.svg" width="72"/> | 检索 / 浏览  | 圆眼转圈                                               |
+| `working`   | <img src="./assets/states/working.svg" width="72"/>   | 执行中       | 眯眼专注、逐行扫读；别名 `busy`                        |
+| `waiting`   | <img src="./assets/states/waiting.svg" width="72"/>   | 等你答复     | 歪头疑问、一只眼睁大；别名 `ask`、`question`           |
+| `error`     | <img src="./assets/states/error.svg" width="72"/>     | 出错 / 晕    | X 眼晃悠；别名 `dizzy`、`fail`；pulse                  |
+| `sad`       | <img src="./assets/states/sad.svg" width="72"/>       | 难过 / 疲惫  | 眼皮下垂、低头；别名 `tired`                           |
+| `sleep`     | <img src="./assets/states/sleep.svg" width="72"/>     | 离线 / 暂停  | 闭眼慢呼吸、zzz                                        |
+| `wake`      | <img src="./assets/states/wake.svg" width="72"/>      | 上线         | 睁眼、伸展，然后自动 → `idle`                          |
 
 动态效果见[在线演示](https://scccc6ut.github.io/npface/)。
 
@@ -381,7 +386,12 @@ registerState('love', {
   head: { y: -1 },
   spring: 'bouncy',
   motions: [{ type: 'sine', target: 'head.rot', amp: 3, period: 900 }],
-  sequence: { steps: [{ at: 0, head: { sy: 0.95 } }, { at: 150, head: { sy: 1 } }] },
+  sequence: {
+    steps: [
+      { at: 0, head: { sy: 0.95 } },
+      { at: 150, head: { sy: 1 } },
+    ],
+  },
 });
 
 face.set('love');
@@ -398,7 +408,7 @@ face.set('love');
 es.onmessage = (e) => {
   const { status, event } = JSON.parse(e.data);
   if (event === 'done') face.pulse('proud');
-  else face.set(status);          // thinking | searching | working | waiting | error | idle …
+  else face.set(status); // thinking | searching | working | waiting | error | idle …
 };
 ```
 

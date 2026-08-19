@@ -6,7 +6,9 @@ let container: HTMLDivElement;
 
 beforeEach(() => {
   vi.useFakeTimers();
-  vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => setTimeout(() => cb(performance.now()), 16) as unknown as number);
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation(
+    (cb) => setTimeout(() => cb(performance.now()), 16) as unknown as number,
+  );
   vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => clearTimeout(id));
   container = document.createElement('div');
   document.body.appendChild(container);
@@ -74,7 +76,11 @@ describe('createNpface', () => {
   });
 
   it('applies colours, themes and sizes', () => {
-    const face = createNpface(container, { theme: 'dark', colors: { eye: '#ff0000' }, size: '3rem' });
+    const face = createNpface(container, {
+      theme: 'dark',
+      colors: { eye: '#ff0000' },
+      size: '3rem',
+    });
     const svg = face.el;
     expect(svg.style.width).toBe('3rem');
     expect(svg.querySelector('.npface-eye-l')?.getAttribute('fill')).toBe('#ff0000');

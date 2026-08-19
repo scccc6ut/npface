@@ -43,7 +43,14 @@ export const STATES: Record<string, StateDef> = {
     blink: DEFAULT_BLINK,
     motions: [
       BREATH,
-      { type: 'glance', every: [3500, 8000], hold: [500, 1200], x: [-3, 3], y: [-1.5, 1.5], head: 0.6 },
+      {
+        type: 'glance',
+        every: [3500, 8000],
+        hold: [500, 1200],
+        x: [-3, 3],
+        y: [-1.5, 1.5],
+        head: 0.6,
+      },
     ],
   },
 
@@ -144,7 +151,15 @@ export const STATES: Record<string, StateDef> = {
     spring: 'snappy',
     blink: { every: [3500, 7500], double: 0.2 },
     motions: [
-      { type: 'sweep', target: 'eye.x', from: -4.5, to: 4.5, period: 1300, back: 0.18, ease: 'inOutSine' },
+      {
+        type: 'sweep',
+        target: 'eye.x',
+        from: -4.5,
+        to: 4.5,
+        period: 1300,
+        back: 0.18,
+        ease: 'inOutSine',
+      },
       { type: 'keys', target: 'eye.y', values: [0, 1, 2], period: 3900, spring: 'snappy' },
       { type: 'sine', target: 'head.y', amp: 0.4, period: 2600 },
     ],

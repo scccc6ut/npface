@@ -1,6 +1,7 @@
 /** Shared environment helpers — all lazy, so importing npface is safe during SSR. */
 
-export const isBrowser = (): boolean => typeof window !== 'undefined' && typeof document !== 'undefined';
+export const isBrowser = (): boolean =>
+  typeof window !== 'undefined' && typeof document !== 'undefined';
 
 type Listener = (matches: boolean) => void;
 

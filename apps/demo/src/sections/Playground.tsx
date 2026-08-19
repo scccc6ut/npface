@@ -5,6 +5,7 @@ import type { UIStrings } from '../lib/i18n';
 import { Section } from '../components/Section';
 import { Toggle } from '../components/Toggle';
 import { CodeBlock } from '../components/CodeBlock';
+import { usePageTheme } from '../lib/theme';
 
 type Theme = 'auto' | 'light' | 'dark';
 
@@ -21,7 +22,9 @@ function snippets(cfg: {
 }) {
   const opt: string[] = [`state: '${cfg.state}'`, `size: ${cfg.size}`];
   if (!cfg.isDefaultColors)
-    opt.push(`colors: { body: '${cfg.colors.body}', visor: '${cfg.colors.visor}', eye: '${cfg.colors.eye}' }`);
+    opt.push(
+      `colors: { body: '${cfg.colors.body}', visor: '${cfg.colors.visor}', eye: '${cfg.colors.eye}' }`,
+    );
   if (cfg.follow) opt.push('follow: true');
   if (cfg.theme !== 'auto') opt.push(`theme: '${cfg.theme}'`);
   if (cfg.reduced) opt.push('reducedMotion: true');
@@ -38,7 +41,9 @@ face.destroy();`;
 
   const props: string[] = [`state={status}`, `size={${cfg.size}}`];
   if (!cfg.isDefaultColors)
-    props.push(`colors={{ body: '${cfg.colors.body}', visor: '${cfg.colors.visor}', eye: '${cfg.colors.eye}' }}`);
+    props.push(
+      `colors={{ body: '${cfg.colors.body}', visor: '${cfg.colors.visor}', eye: '${cfg.colors.eye}' }}`,
+    );
   if (cfg.follow) props.push('follow');
   if (cfg.theme !== 'auto') props.push(`theme="${cfg.theme}"`);
   if (cfg.reduced) props.push('reducedMotion');
@@ -83,6 +88,7 @@ export function Playground({
   sectionRef: Ref<HTMLElement>;
 }) {
   const ref = useRef<NpfaceHandle>(null);
+  const pageTheme = usePageTheme();
   const [size, setSize] = useState(160);
   const [colors, setColors] = useState(COLOR_PRESETS[0]!.colors);
   const [follow, setFollow] = useState(true);
@@ -111,7 +117,9 @@ export function Playground({
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         {/* stage */}
         <div className="flex flex-col gap-4">
-          <div className={`card stage-grid relative flex min-h-[360px] items-center justify-center rounded-3xl ${theme === 'dark' ? 'bg-ink!' : theme === 'light' ? 'bg-white!' : ''}`}>
+          <div
+            className={`card stage-grid relative flex min-h-[360px] items-center justify-center rounded-3xl ${theme === 'dark' ? 'bg-ink!' : theme === 'light' ? 'bg-white!' : ''}`}
+          >
             <Npface
               ref={ref}
               state={selected}
@@ -119,7 +127,7 @@ export function Playground({
               colors={colors}
               follow={follow}
               reducedMotion={reduced ? true : 'auto'}
-              theme={theme}
+              theme={theme === 'auto' ? pageTheme : theme}
               look={look}
               label={`npface ${selected}`}
             />
@@ -166,7 +174,12 @@ export function Playground({
             <div className="mt-4 mb-2 text-sm font-semibold">{t.pulse}</div>
             <div className="flex flex-wrap gap-1.5">
               {PULSES.map((p) => (
-                <button key={p} type="button" className="btn btn-lime px-2.5 py-1 font-mono text-xs" onClick={() => ref.current?.pulse(p)}>
+                <button
+                  key={p}
+                  type="button"
+                  className="btn btn-lime px-2.5 py-1 font-mono text-xs"
+                  onClick={() => ref.current?.pulse(p)}
+                >
                   pulse('{p}')
                 </button>
               ))}
@@ -179,10 +192,22 @@ export function Playground({
                 <span>{t.size}</span>
                 <span className="font-mono text-xs font-normal">{size}px</span>
               </div>
-              <input className="range" type="range" min={24} max={280} value={size} onChange={(e) => setSize(+e.target.value)} />
+              <input
+                className="range"
+                type="range"
+                min={24}
+                max={280}
+                value={size}
+                onChange={(e) => setSize(+e.target.value)}
+              />
               <div className="mt-2 flex gap-1.5">
                 {[32, 48, 64, 96, 160].map((s) => (
-                  <button key={s} type="button" className={`btn px-2 py-0.5 text-xs ${size === s ? 'btn-active' : ''}`} onClick={() => setSize(s)}>
+                  <button
+                    key={s}
+                    type="button"
+                    className={`btn px-2 py-0.5 text-xs ${size === s ? 'btn-active' : ''}`}
+                    onClick={() => setSize(s)}
+                  >
                     {s}
                   </button>
                 ))}
@@ -195,7 +220,12 @@ export function Playground({
                 <span>{t.theme}</span>
                 <div className="flex gap-1">
                   {(['auto', 'light', 'dark'] as const).map((th) => (
-                    <button key={th} type="button" className={`btn px-2 py-0.5 text-xs ${theme === th ? 'btn-active' : ''}`} onClick={() => setTheme(th)}>
+                    <button
+                      key={th}
+                      type="button"
+                      className={`btn px-2 py-0.5 text-xs ${theme === th ? 'btn-active' : ''}`}
+                      onClick={() => setTheme(th)}
+                    >
                       {th === 'auto' ? t.themeAuto : th === 'light' ? t.themeLight : t.themeDark}
                     </button>
                   ))}
@@ -255,7 +285,10 @@ export function Playground({
               >
                 <div
                   className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-lime ring-2 ring-navy dark:ring-lime-pale"
-                  style={{ left: `${((look?.[0] ?? 0) + 1) * 50}%`, top: `${((look?.[1] ?? 0) + 1) * 50}%` }}
+                  style={{
+                    left: `${((look?.[0] ?? 0) + 1) * 50}%`,
+                    top: `${((look?.[1] ?? 0) + 1) * 50}%`,
+                  }}
                 />
               </div>
               <div className="text-[11px] opacity-60">{t.lookHint}</div>

@@ -75,10 +75,7 @@ export type SpringSpec = SpringPreset | SpringConfig;
  * `eyeL.*` / `eyeR.*` hit one eye, `head.*` hits the helmet.
  */
 export type MotionTarget =
-  | `eye.${EyeProp}`
-  | `eyeL.${EyeProp}`
-  | `eyeR.${EyeProp}`
-  | `head.${HeadProp}`;
+  `eye.${EyeProp}` | `eyeL.${EyeProp}` | `eyeR.${EyeProp}` | `head.${HeadProp}`;
 
 export type EaseName = 'linear' | 'inQuad' | 'outQuad' | 'inOutSine' | 'outCubic' | 'inOutCubic';
 

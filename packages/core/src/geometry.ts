@@ -143,7 +143,13 @@ const DEG = Math.PI / 180;
  * @param hx,hy  home position of the eye centre
  * @param blink  0..1 extra top-lid closure from an ongoing blink
  */
-export function eyePath(e: EyeShape, right: boolean, hx: number, hy: number, blink: number): string {
+export function eyePath(
+  e: EyeShape,
+  right: boolean,
+  hx: number,
+  hy: number,
+  blink: number,
+): string {
   const w = e.w,
     h = e.h;
   if (w <= 0.05 || h <= 0.05) return '';

@@ -48,7 +48,10 @@ describe('spring', () => {
   it('resolves presets and raw configs', () => {
     expect(resolveSpring('bouncy', SPRINGS.default)).toBe(SPRINGS.bouncy);
     expect(resolveSpring(undefined, SPRINGS.slow)).toBe(SPRINGS.slow);
-    expect(resolveSpring({ stiffness: 1, damping: 2 }, SPRINGS.default)).toEqual({ stiffness: 1, damping: 2 });
+    expect(resolveSpring({ stiffness: 1, damping: 2 }, SPRINGS.default)).toEqual({
+      stiffness: 1,
+      damping: 2,
+    });
   });
 
   it('survives large time steps (tab was hidden)', () => {

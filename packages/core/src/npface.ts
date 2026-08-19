@@ -143,7 +143,10 @@ export function resolveDef(def: StateDef, registry: Record<string, StateDef>, de
 }
 
 /** Canonical state name for `name` (alias-aware); unknown names fall back to `idle`. */
-export function resolveStateName(name: string, registry: Record<string, StateDef> = STATES): string {
+export function resolveStateName(
+  name: string,
+  registry: Record<string, StateDef> = STATES,
+): string {
   const n = (name || '').trim();
   if (registry[n]) return n;
   const a = ALIASES[n] ?? ALIASES[n.toLowerCase()];
@@ -157,7 +160,8 @@ function stateSpring(def: StateDef, group: 'eye' | 'head', rm: boolean): SpringC
   if (rm) return SPRING_REDUCED;
   const s = def.spring;
   if (!s) return SPRINGS.default;
-  if (typeof s === 'string' || 'stiffness' in s) return resolveSpring(s as SpringSpec, SPRINGS.default);
+  if (typeof s === 'string' || 'stiffness' in s)
+    return resolveSpring(s as SpringSpec, SPRINGS.default);
   return resolveSpring(s[group], SPRINGS.default);
 }
 
@@ -413,7 +417,8 @@ export class NpfaceInstance implements Npface {
 
   setTheme(theme: Theme): void {
     this.theme = theme;
-    if (theme === 'auto' && !this.unDark) this.unDark = darkSchemeQuery.on(() => this.applyColors());
+    if (theme === 'auto' && !this.unDark)
+      this.unDark = darkSchemeQuery.on(() => this.applyColors());
     this.applyColors();
   }
 
@@ -462,7 +467,14 @@ export class NpfaceInstance implements Npface {
     // targets
     const cfgEye = stateSpring(def, 'eye', rm);
     const cfgHead = stateSpring(def, 'head', rm);
-    this.applyTargets({ ...BASE_EYE, ...def.eye, ...def.eyes?.[0] }, { ...BASE_EYE, ...def.eye, ...def.eyes?.[1] }, { ...BASE_HEAD, ...def.head }, cfgEye, cfgHead, immediate);
+    this.applyTargets(
+      { ...BASE_EYE, ...def.eye, ...def.eyes?.[0] },
+      { ...BASE_EYE, ...def.eye, ...def.eyes?.[1] },
+      { ...BASE_HEAD, ...def.head },
+      cfgEye,
+      cfgHead,
+      immediate,
+    );
 
     // entry sequence
     this.seq = null;
@@ -543,7 +555,12 @@ export class NpfaceInstance implements Npface {
     }
   }
 
-  private applyStep(st: SequenceStep, snap: boolean, cfgEye: SpringConfig, cfgHead: SpringConfig): void {
+  private applyStep(
+    st: SequenceStep,
+    snap: boolean,
+    cfgEye: SpringConfig,
+    cfgHead: SpringConfig,
+  ): void {
     const ce = st.spring ? resolveSpring(st.spring, cfgEye) : cfgEye;
     const ch = st.spring ? resolveSpring(st.spring, cfgHead) : cfgHead;
     const setEye = (s: EyeSprings, part: Partial<EyeShape> | undefined) => {
@@ -718,7 +735,12 @@ export class NpfaceInstance implements Npface {
     if (px !== px || py !== py) return null; // NaN → pointer left
     if (!this.rect || now - this.rect.t > 300) {
       const r = this.el.getBoundingClientRect();
-      this.rect = { cx: r.left + r.width / 2, cy: r.top + r.height / 2, size: r.width || 48, t: now };
+      this.rect = {
+        cx: r.left + r.width / 2,
+        cy: r.top + r.height / 2,
+        size: r.width || 48,
+        t: now,
+      };
     }
     const dx = px - this.rect.cx;
     const dy = py - this.rect.cy;

@@ -16,8 +16,10 @@ describe('state data', () => {
   it('only uses known eye / head props and motion targets', () => {
     for (const [name, def] of Object.entries(STATES)) {
       for (const k of Object.keys(def.eye ?? {})) expect(EYE_KEYS, `${name}.eye.${k}`).toContain(k);
-      for (const part of def.eyes ?? []) for (const k of Object.keys(part)) expect(EYE_KEYS, `${name}.eyes.${k}`).toContain(k);
-      for (const k of Object.keys(def.head ?? {})) expect(HEAD_KEYS, `${name}.head.${k}`).toContain(k);
+      for (const part of def.eyes ?? [])
+        for (const k of Object.keys(part)) expect(EYE_KEYS, `${name}.eyes.${k}`).toContain(k);
+      for (const k of Object.keys(def.head ?? {}))
+        expect(HEAD_KEYS, `${name}.head.${k}`).toContain(k);
       for (const m of def.motions ?? []) {
         if (m.type === 'glance') continue;
         const [group, prop] = m.target.split('.');

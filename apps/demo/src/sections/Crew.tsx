@@ -3,6 +3,7 @@ import { Npface } from 'npface-react';
 import { SHOWCASE } from '../lib/meta';
 import type { UIStrings } from '../lib/i18n';
 import { Section } from '../components/Section';
+import { usePageTheme } from '../lib/theme';
 
 function useFps(): number {
   const [fps, setFps] = useState(0);
@@ -28,6 +29,7 @@ function useFps(): number {
 export function Crew({ t }: { t: UIStrings }) {
   const [count, setCount] = useState(36);
   const fps = useFps();
+  const theme = usePageTheme();
   const members = useMemo(() => {
     const out: { id: number; state: string }[] = [];
     let s = 7;
@@ -54,7 +56,7 @@ export function Crew({ t }: { t: UIStrings }) {
         <div className="grid grid-cols-[repeat(auto-fill,minmax(44px,1fr))] gap-2">
           {members.map((m) => (
             <div key={m.id} className="flex justify-center">
-              <Npface state={m.state} size={40} follow label={m.state} />
+              <Npface state={m.state} size={40} follow label={m.state} theme={theme} />
             </div>
           ))}
         </div>

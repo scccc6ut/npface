@@ -11,7 +11,8 @@
   --color-sand: #e9ebe4;
   --color-warm: #f6f7f2;
   --color-ink: #0b1222;
-  --font-sans: ui-rounded, 'SF Pro Rounded', Inter, system-ui, -apple-system, 'Segoe UI', Roboto,
+  --font-sans:
+    ui-rounded, 'SF Pro Rounded', Inter, system-ui, -apple-system, 'Segoe UI', Roboto,
     'PingFang SC', 'Noto Sans SC', sans-serif;
   --font-mono: ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace;
 }
