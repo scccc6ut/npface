@@ -151,7 +151,7 @@ Also exported: `STATES`, `STATE_NAMES`, `ALIASES`, `registerState(name, def)`, `
 | `sleep`     | <img src="./assets/states/sleep.svg" width="72"/>     | offline / paused      | closed eyes, slow breath, z z z                           |
 | `wake`      | <img src="./assets/states/wake.svg" width="72"/>      | coming online         | eyes pop open, stretch, then auto → `idle`                |
 
-See them move in the [live demo](https://scccc6ut.github.io/npface/).
+The previews above are animated SVGs recorded from the engine itself (`pnpm assets`); see everything move in the [live demo](https://scccc6ut.github.io/npface/).
 
 ### Customise
 
@@ -223,6 +223,7 @@ apps/demo        gallery / playground (Vite + React + Tailwind) → GitHub Pages
 pnpm install
 pnpm dev          # demo with HMR against package sources
 pnpm check        # lint + typecheck + build + test + size budget
+pnpm assets       # re-record the README banner + animated state previews from the engine
 pnpm release 0.1.0 --dry-run   # bump both packages, run checks, (dry) publish
 ```
 
@@ -361,7 +362,7 @@ export function Employee({ status }: { status: string }) {
 | `sleep`     | <img src="./assets/states/sleep.svg" width="72"/>     | 离线 / 暂停  | 闭眼慢呼吸、zzz                                        |
 | `wake`      | <img src="./assets/states/wake.svg" width="72"/>      | 上线         | 睁眼、伸展，然后自动 → `idle`                          |
 
-动态效果见[在线演示](https://scccc6ut.github.io/npface/)。
+上表预览是用引擎本身录制的动态 SVG（`pnpm assets`）；完整效果见[在线演示](https://scccc6ut.github.io/npface/)。
 
 ### 自定义
 
@@ -433,6 +434,7 @@ apps/demo        展馆 / 调试台（Vite + React + Tailwind）→ GitHub Pages
 pnpm install
 pnpm dev          # 运行 demo（直接引用包源码，支持 HMR）
 pnpm check        # lint + 类型 + 构建 + 测试 + 体积预算
+pnpm assets       # 用引擎重新录制 README 横幅与各状态的动态预览（SVG）
 pnpm release 0.1.0 --dry-run   # 两个包同步升版本、跑检查、（演练）发布
 ```
 
