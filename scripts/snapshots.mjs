@@ -1,4 +1,5 @@
-// Render static SVG previews of every state for the README (uses the built core: run `pnpm build` first).
+// Render the static README banner (all states in a row) from the built core — run `pnpm build` first.
+// Per-state *animated* previews are produced by scripts/record.mjs.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
@@ -15,8 +16,7 @@ import {
   eyePath,
 } from '../packages/core/dist/index.js';
 
-const OUT = resolve('assets/states');
-mkdirSync(OUT, { recursive: true });
+mkdirSync(resolve('assets'), { recursive: true });
 
 /** Resolve a representative pose for a state (base + sequence steps). */
 function poseFor(name) {
@@ -80,11 +80,6 @@ function faceSvg(name, { size = 120, bg = true, blink = 0 } = {}) {
 `;
 }
 
-for (const name of STATE_NAMES) {
-  const svg = faceSvg(name, { blink: name === 'blink' ? 0.72 : 0 });
-  writeFileSync(resolve(OUT, `${name}.svg`), svg);
-}
-
 // banner: all states in a row (no individual backgrounds)
 const names = STATE_NAMES;
 const cell = 100;
@@ -106,4 +101,4 @@ const banner = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" 
 </svg>
 `;
 writeFileSync(resolve('assets/banner.svg'), banner);
-console.log(`wrote ${names.length} state previews + banner to assets/`);
+console.log(`wrote assets/banner.svg (${names.length} states)`);
