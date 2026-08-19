@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="npface — 表情头盔 · 会表情的 AI 员工头像。An expressive, zero-dependency helmet avatar for AI agents." />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>npface — 表情头盔 · expressive AI-agent avatar</title>
+    <script>
+      // apply theme before paint to avoid a flash
+      try {
+        var s = localStorage.getItem('npface-theme');
+        var d = s ? s === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        if (d) document.documentElement.classList.add('dark');
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

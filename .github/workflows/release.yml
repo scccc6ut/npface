@@ -1,0 +1,35 @@
+name: Publish to npm
+
+# Manual only — run after tagging a release locally (see scripts/release.mjs),
+# or use it instead of local publishing. Needs an NPM_TOKEN repository secret.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: npm dist-tag
+        default: latest
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm size
+      - run: pnpm --filter npface publish --access public --no-git-checks --provenance --tag ${{ inputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: pnpm --filter npface-react publish --access public --no-git-checks --provenance --tag ${{ inputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

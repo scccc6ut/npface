@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.turbo/
+*.log
+.DS_Store
+.vite/
+coverage/
+*.tgz
+.env
+.env.*
+!.env.example
+.scratch/

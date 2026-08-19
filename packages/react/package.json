@@ -1,0 +1,50 @@
+{
+  "name": "npface-react",
+  "version": "0.1.0",
+  "description": "React bindings for npface — the expressive helmet avatar for AI agents",
+  "keywords": ["npface", "react", "avatar", "ai-agent", "emotion", "svg", "animation"],
+  "license": "MIT",
+  "homepage": "https://github.com/scccc6ut/npface#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scccc6ut/npface.git",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/scccc6ut/npface/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "npface": "workspace:^"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "react": "^19.2.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

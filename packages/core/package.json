@@ -1,0 +1,64 @@
+{
+  "name": "npface",
+  "version": "0.1.0",
+  "description": "表情头盔 · 会表情的 AI 员工头像 — an expressive, zero-dependency SVG helmet avatar for AI agents (12 semantic states, springs, gaze, reduced-motion aware)",
+  "keywords": [
+    "avatar",
+    "emoji",
+    "emotion",
+    "expression",
+    "ai-agent",
+    "svg",
+    "animation",
+    "spring",
+    "helmet",
+    "npcrew",
+    "zero-dependency"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/scccc6ut/npface#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scccc6ut/npface.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/scccc6ut/npface/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/npface.min.js",
+  "jsdelivr": "./dist/npface.min.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "happy-dom": "^20.11.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

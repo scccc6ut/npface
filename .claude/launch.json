@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "scratch",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4199", "--bind", "127.0.0.1"],
+      "port": 4199
+    },
+    {
+      "name": "demo",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "npface-demo", "dev", "--port", "5173", "--strictPort"],
+      "port": 5173
+    }
+  ]
+}

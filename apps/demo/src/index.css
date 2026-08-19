@@ -1,0 +1,69 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-navy: #0f1d3a;
+  --color-navy-700: #1b2d56;
+  --color-lime: #c7f636;
+  --color-lime-deep: #4c6606;
+  --color-lime-pale: #eff8cf;
+  --color-sand: #e9ebe4;
+  --color-warm: #f6f7f2;
+  --color-ink: #0b1222;
+  --font-sans: ui-rounded, 'SF Pro Rounded', Inter, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'PingFang SC', 'Noto Sans SC', sans-serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+:root {
+  color-scheme: light;
+}
+:root.dark {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-warm text-navy antialiased dark:bg-ink dark:text-sand;
+}
+
+.card {
+  @apply rounded-2xl border border-navy/10 bg-white/70 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-1.5 rounded-xl border border-navy/15 bg-white px-3 py-1.5 text-sm font-medium text-navy transition hover:border-navy/40 active:scale-[0.98] dark:border-white/15 dark:bg-white/5 dark:text-sand dark:hover:border-white/40;
+}
+.btn-primary {
+  @apply border-transparent bg-navy text-lime hover:bg-navy-700 dark:bg-lime dark:text-navy dark:hover:bg-lime/90;
+}
+.btn-lime {
+  @apply border-transparent bg-lime text-lime-deep hover:bg-lime/90;
+}
+.btn-active {
+  @apply border-navy bg-navy text-lime dark:border-lime dark:bg-lime dark:text-navy;
+}
+
+.chip {
+  @apply inline-flex items-center gap-1 rounded-full bg-lime-pale px-2.5 py-0.5 text-xs font-medium text-lime-deep dark:bg-lime/15 dark:text-lime;
+}
+
+.stage-grid {
+  background-image: radial-gradient(circle at 1px 1px, rgb(15 29 58 / 0.12) 1px, transparent 0);
+  background-size: 18px 18px;
+}
+.dark .stage-grid {
+  background-image: radial-gradient(circle at 1px 1px, rgb(233 235 228 / 0.12) 1px, transparent 0);
+}
+
+.range {
+  @apply h-2 w-full cursor-pointer appearance-none rounded-full bg-navy/10 accent-navy dark:bg-white/10 dark:accent-lime;
+}
+
+.kbd {
+  @apply rounded-md border border-navy/15 bg-navy/5 px-1.5 py-0.5 font-mono text-[11px] dark:border-white/15 dark:bg-white/10;
+}
