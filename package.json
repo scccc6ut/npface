@@ -17,7 +17,7 @@
     "test": "pnpm --filter npface test",
     "size": "node scripts/size.mjs",
     "assets": "pnpm build && node scripts/snapshots.mjs && node scripts/record.mjs",
-    "check": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm size",
+    "check": "pnpm lint && pnpm build && pnpm typecheck && pnpm test && pnpm size",
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,md,yml,css}\"",
     "release": "node scripts/release.mjs"
   },

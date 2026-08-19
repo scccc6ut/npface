@@ -46,8 +46,8 @@ for (const dir of pkgs) {
 
 // 3. checks + build
 run('pnpm lint');
-run('pnpm typecheck');
 run('pnpm build');
+run('pnpm typecheck');
 run('pnpm test');
 run('pnpm size');
 
