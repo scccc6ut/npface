@@ -46,8 +46,6 @@ export const UI = {
     clear: 'Reset',
     faces: 'faces',
     footer: 'MIT licensed. Built for npcrew — and for anyone shipping AI agents with personality.',
-    credits:
-      'Inspired by the idea of state-driven expressive avatars (projects like emotion-ball). npface shares no code, geometry data or artwork with them — everything here is original and MIT.',
     auto: 'auto',
     oneShot: 'one-shot',
     alias: 'alias',
@@ -104,8 +102,6 @@ export const UI = {
     clear: '重置',
     faces: '个',
     footer: 'MIT 协议。为 npcrew 而生，也给所有想让 AI 代理有点个性的人。',
-    credits:
-      '灵感来自"用状态驱动表情头像"这一思路（如 emotion-ball 等项目）。npface 未使用其任何代码、几何数据与插画——这里的一切都是原创，MIT 开源。',
     auto: '自动',
     oneShot: '一次性',
     alias: '别名',

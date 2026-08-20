@@ -5,7 +5,6 @@ export function Footer({ t }: { t: UIStrings }) {
     <footer className="mx-auto w-full max-w-6xl px-5 pt-6 pb-14 text-sm text-navy/70 dark:text-sand/70">
       <div className="border-t border-navy/10 pt-6 dark:border-white/10">
         <p>{t.footer}</p>
-        <p className="mt-2 text-xs leading-relaxed opacity-80">{t.credits}</p>
         <div className="mt-3 flex flex-wrap gap-4 text-xs">
           <a
             className="hover:underline"

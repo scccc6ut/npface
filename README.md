@@ -228,9 +228,9 @@ pnpm assets       # re-record the README banner + animated state previews from t
 pnpm release 0.1.0 --dry-run   # bump both packages, run checks, (dry) publish
 ```
 
-### Credits & license
+### License
 
-Inspired by the idea of state-driven expressive avatars popularised by projects such as [emotion-ball](https://github.com/sam70361/emotion-ball). npface shares **no code, geometry data or artwork** with them — the helmet, eye model, state data and engine are original work, released under the **MIT license**. The helmet mark belongs to npcrew.
+The helmet, eye model, state data and engine are original work, released under the **MIT license**. The helmet mark belongs to npcrew.
 
 ---
 
@@ -440,6 +440,6 @@ pnpm assets       # 用引擎重新录制 README 横幅与各状态的动态预�
 pnpm release 0.1.0 --dry-run   # 两个包同步升版本、跑检查、（演练）发布
 ```
 
-### 致谢与协议
+### 协议
 
-灵感来自以 [emotion-ball](https://github.com/sam70361/emotion-ball) 为代表的"状态驱动表情头像"这一思路。npface **未使用其任何代码、几何数据或插画**——头盔、眼睛模型、状态数据与引擎均为原创，以 **MIT 协议**发布。头盔形象归 npcrew 所有。
+头盔、眼睛模型、状态数据与引擎均为原创，以 **MIT 协议**发布。头盔形象归 npcrew 所有。

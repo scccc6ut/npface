@@ -60,7 +60,8 @@ for (const dir of pkgs) {
 
 if (!dry) {
   run(`git add packages/*/package.json`);
-  run(`git commit -m "release: v${version}"`);
+  const staged = execSync('git diff --cached --name-only').toString().trim();
+  if (staged) run(`git commit -m "release: v${version}"`);
   run(`git tag v${version}`);
   console.log(`\nDone. Push with: git push && git push --tags`);
 } else {
