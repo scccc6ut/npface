@@ -2,7 +2,15 @@
   "name": "npface-react",
   "version": "0.1.0",
   "description": "React bindings for npface — the expressive helmet avatar for AI agents",
-  "keywords": ["npface", "react", "avatar", "ai-agent", "emotion", "svg", "animation"],
+  "keywords": [
+    "npface",
+    "react",
+    "avatar",
+    "ai-agent",
+    "emotion",
+    "svg",
+    "animation"
+  ],
   "license": "MIT",
   "homepage": "https://github.com/scccc6ut/npface#readme",
   "repository": {
@@ -25,7 +33,11 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsup",
