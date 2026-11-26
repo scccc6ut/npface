@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { Npface, type NpfaceHandle } from 'npface-react';
-import { STATE_META } from '../lib/meta';
+import { STATE_META, SHAPE_META } from '../lib/meta';
 import type { Lang, UIStrings } from '../lib/i18n';
 import { Section } from '../components/Section';
 import { usePageTheme } from '../lib/theme';
 
 function Card({
   name,
+  shape,
   lang,
   t,
   onPick,
 }: {
   name: string;
+  shape: string;
   lang: Lang;
   t: UIStrings;
   onPick: (s: string) => void;
@@ -42,7 +44,7 @@ function Card({
       aria-label={`${name} — ${lang === 'en' ? meta.descEn : meta.descZh}`}
       className="card group flex flex-col items-center gap-2 px-3 pt-5 pb-4 text-center transition hover:-translate-y-0.5 hover:shadow-md"
     >
-      <Npface ref={ref} state={state} size={84} follow label={name} theme={theme} />
+      <Npface ref={ref} state={state} shape={shape} size={84} follow label={name} theme={theme} />
       <div className="mt-1 font-mono text-sm font-semibold">{name}</div>
       <div className="text-xs font-medium text-navy/70 dark:text-sand/70">
         {lang === 'en' ? meta.zh : meta.en}
@@ -72,11 +74,26 @@ export function Gallery({
   lang: Lang;
   onPick: (s: string) => void;
 }) {
+  const [shape, setShape] = useState('square');
   return (
     <Section id="states" title={`${t.gallery} · ${STATE_META.length}`} body={t.galleryBody}>
+      <div className="mb-4 flex flex-wrap items-center gap-1.5" role="group" aria-label={t.shape}>
+        <span className="mr-1 text-sm font-semibold">{t.shape}</span>
+        {SHAPE_META.map((m) => (
+          <button
+            key={m.name}
+            type="button"
+            aria-pressed={shape === m.name}
+            className={`btn px-2.5 py-1 font-mono text-xs ${shape === m.name ? 'btn-active' : ''}`}
+            onClick={() => setShape(m.name)}
+          >
+            {m.name}
+          </button>
+        ))}
+      </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {STATE_META.map((m) => (
-          <Card key={m.name} name={m.name} lang={lang} t={t} onPick={onPick} />
+          <Card key={m.name} name={m.name} shape={shape} lang={lang} t={t} onPick={onPick} />
         ))}
       </div>
     </Section>

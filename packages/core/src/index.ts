@@ -10,6 +10,15 @@ export {
 } from './npface';
 export { STATES, ALIASES, STATE_NAMES, BASE_EYE, BASE_HEAD, DEFAULT_BLINK } from './states';
 export type { StateName } from './states';
+export {
+  SHAPES,
+  SHAPE_NAMES,
+  SHAPE_ALIASES,
+  resolveShape,
+  resolveShapeName,
+  registerShape,
+} from './shapes';
+export type { ShapeName, ResolvedShape } from './shapes';
 export { SPRINGS, Spring, EASE } from './spring';
 export {
   HELMET,
@@ -22,6 +31,12 @@ export {
   crossPath,
   roundedPolygon,
   roundedRectPath,
+  OUTLINE_POINTS,
+  roundedPolygonPoints,
+  ellipsePoints,
+  ellipsePath,
+  resampleOutline,
+  pointsPath,
 } from './geometry';
 export { MotionLayer } from './motion';
 export type {
@@ -34,6 +49,7 @@ export type {
   EyeProp,
   HeadProp,
   StateDef,
+  ShapeDef,
   SequenceStep,
   BlinkConfig,
   Motion,

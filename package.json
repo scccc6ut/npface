@@ -16,7 +16,7 @@
     "lint": "eslint .",
     "test": "pnpm --filter npface test",
     "size": "node scripts/size.mjs",
-    "assets": "pnpm build && node scripts/snapshots.mjs && node scripts/record.mjs",
+    "assets": "pnpm build && node scripts/snapshots.mjs && node scripts/record.mjs && node scripts/shapes-assets.mjs",
     "check": "pnpm lint && pnpm build && pnpm typecheck && pnpm test && pnpm size",
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,md,yml,css}\"",
     "release": "node scripts/release.mjs"

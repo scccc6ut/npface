@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, type PointerEvent as RPointerEvent, type Ref } from 'react';
 import { Npface, type NpfaceHandle } from 'npface-react';
-import { STATE_META, COLOR_PRESETS } from '../lib/meta';
+import { STATE_META, COLOR_PRESETS, SHAPE_META } from '../lib/meta';
 import type { UIStrings } from '../lib/i18n';
 import { Section } from '../components/Section';
 import { Toggle } from '../components/Toggle';
@@ -13,6 +13,7 @@ const PULSES = ['proud', 'happy', 'error', 'blink'];
 
 function snippets(cfg: {
   state: string;
+  shape: string;
   size: number;
   colors: { body: string; visor: string; eye: string };
   follow: boolean;
@@ -21,6 +22,7 @@ function snippets(cfg: {
   isDefaultColors: boolean;
 }) {
   const opt: string[] = [`state: '${cfg.state}'`, `size: ${cfg.size}`];
+  if (cfg.shape !== 'square') opt.push(`shape: '${cfg.shape}'`);
   if (!cfg.isDefaultColors)
     opt.push(
       `colors: { body: '${cfg.colors.body}', visor: '${cfg.colors.visor}', eye: '${cfg.colors.eye}' }`,
@@ -35,11 +37,13 @@ const face = createNpface(document.querySelector('#avatar'), {
 });
 
 face.set('thinking');      // switch state (spring transition)
+face.setShape('circle');   // morph to another face shape
 face.pulse('proud');       // one-shot, then back
 face.follow(true);         // eyes follow the pointer
 face.destroy();`;
 
   const props: string[] = [`state={status}`, `size={${cfg.size}}`];
+  if (cfg.shape !== 'square') props.push(`shape="${cfg.shape}"`);
   if (!cfg.isDefaultColors)
     props.push(
       `colors={{ body: '${cfg.colors.body}', visor: '${cfg.colors.visor}', eye: '${cfg.colors.eye}' }}`,
@@ -81,11 +85,15 @@ export function Playground({
   t,
   selected,
   setSelected,
+  shape,
+  setShape,
   sectionRef,
 }: {
   t: UIStrings;
   selected: string;
   setSelected: (s: string) => void;
+  shape: string;
+  setShape: (s: string) => void;
   sectionRef: Ref<HTMLElement>;
 }) {
   const ref = useRef<NpfaceHandle>(null);
@@ -101,8 +109,9 @@ export function Playground({
 
   const isDefaultColors = JSON.stringify(colors) === JSON.stringify(COLOR_PRESETS[0]!.colors);
   const code = useMemo(
-    () => snippets({ state: selected, size, colors, follow, theme, reduced, isDefaultColors }),
-    [selected, size, colors, follow, theme, reduced, isDefaultColors],
+    () =>
+      snippets({ state: selected, shape, size, colors, follow, theme, reduced, isDefaultColors }),
+    [selected, shape, size, colors, follow, theme, reduced, isDefaultColors],
   );
 
   const onPad = (e: RPointerEvent<HTMLDivElement>) => {
@@ -115,7 +124,7 @@ export function Playground({
 
   return (
     <Section id="playground" title={t.playground} body={t.playgroundBody} sectionRef={sectionRef}>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         {/* stage */}
         <div className="flex flex-col gap-4">
           <div
@@ -124,6 +133,7 @@ export function Playground({
             <Npface
               ref={ref}
               state={selected}
+              shape={shape}
               size={size}
               colors={colors}
               follow={follow}
@@ -133,7 +143,7 @@ export function Playground({
               label={`npface ${selected}`}
             />
             <div className="absolute right-3 bottom-3 font-mono text-[11px] text-navy/50 dark:text-sand/50">
-              {size}px · {selected}
+              {size}px · {shape} · {selected}
             </div>
           </div>
           <div className="card p-4">
@@ -159,7 +169,28 @@ export function Playground({
         {/* controls */}
         <div className="flex flex-col gap-4">
           <div className="card p-4">
-            <div className="mb-2 text-sm font-semibold">{t.state}</div>
+            <div className="mb-2 text-sm font-semibold">{t.shape}</div>
+            <div className="flex flex-wrap gap-1.5">
+              {SHAPE_META.map((m) => (
+                <button
+                  key={m.name}
+                  type="button"
+                  aria-pressed={shape === m.name}
+                  className={`btn gap-1.5 px-2 py-1 font-mono text-xs ${shape === m.name ? 'btn-active' : ''}`}
+                  onClick={() => setShape(m.name)}
+                >
+                  <Npface
+                    shape={m.name}
+                    size={20}
+                    reducedMotion
+                    theme={shape === m.name ? 'dark' : pageTheme}
+                    aria-hidden
+                  />
+                  {m.name}
+                </button>
+              ))}
+            </div>
+            <div className="mt-4 mb-2 text-sm font-semibold">{t.state}</div>
             <div className="flex flex-wrap gap-1.5">
               {STATE_META.filter((m) => !m.auto).map((m) => (
                 <button

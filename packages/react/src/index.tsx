@@ -8,7 +8,14 @@
  * ```
  */
 import { createNpface } from 'npface';
-import type { Npface as NpfaceHandle, NpfaceColors, NpfaceOptions, StateDef, Theme } from 'npface';
+import type {
+  Npface as NpfaceHandle,
+  NpfaceColors,
+  NpfaceOptions,
+  ShapeDef,
+  StateDef,
+  Theme,
+} from 'npface';
 import {
   forwardRef,
   useEffect,
@@ -20,7 +27,7 @@ import {
   type HTMLAttributes,
 } from 'react';
 
-export type { NpfaceHandle, NpfaceColors, NpfaceOptions, StateDef, Theme };
+export type { NpfaceHandle, NpfaceColors, NpfaceOptions, ShapeDef, StateDef, Theme };
 
 export interface NpfaceProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'onChange'> {
   /** State name — `idle`, `thinking`, `working`, `proud` … Unknown names fall back to `idle`. */
@@ -29,6 +36,11 @@ export interface NpfaceProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'onCh
   emotion?: string;
   /** CSS px (number) or any CSS length (string). Default 48. */
   size?: number | string;
+  /**
+   * Face shape: `'square'` (default), `'circle'`, `'triangle'`, `'hexagon'`, `'shield'`,
+   * `'diamond'`, a registered name or a `ShapeDef`. Changing it morphs the helmet.
+   */
+  shape?: string | ShapeDef;
   colors?: Partial<NpfaceColors>;
   /** `'light' | 'dark' | 'auto'` (default auto). */
   theme?: Theme;
@@ -67,6 +79,7 @@ export const Npface = forwardRef<NpfaceHandle | null, NpfaceProps>(function Npfa
     state,
     emotion,
     size = 48,
+    shape,
     colors,
     theme = 'auto',
     follow,
@@ -94,6 +107,7 @@ export const Npface = forwardRef<NpfaceHandle | null, NpfaceProps>(function Npfa
   const initial = useRef({
     state: state ?? emotion ?? 'idle',
     size,
+    shape,
     colors,
     theme,
     label,
@@ -109,6 +123,7 @@ export const Npface = forwardRef<NpfaceHandle | null, NpfaceProps>(function Npfa
     const inst = createNpface(host, {
       state: init.state,
       size: init.size,
+      shape: init.shape,
       colors: init.colors,
       theme: init.theme,
       label: init.label,
@@ -137,6 +152,12 @@ export const Npface = forwardRef<NpfaceHandle | null, NpfaceProps>(function Npfa
   useEffect(() => {
     face?.setSize(size);
   }, [face, size]);
+
+  const shapeKey = shape && typeof shape === 'object' ? JSON.stringify(shape) : (shape ?? 'square');
+  useEffect(() => {
+    face?.setShape(shape ?? 'square');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [face, shapeKey]);
 
   const colorKey = colors ? JSON.stringify(colors) : '';
   useEffect(() => {

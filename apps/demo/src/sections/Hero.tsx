@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Npface, type NpfaceHandle } from 'npface-react';
-import { SHOWCASE } from '../lib/meta';
+import { SHAPE_META, SHOWCASE } from '../lib/meta';
 import type { Lang, UIStrings } from '../lib/i18n';
 import { CodeBlock } from '../components/CodeBlock';
 import { usePageTheme } from '../lib/theme';
@@ -10,20 +10,22 @@ export function Hero({ t, lang }: { t: UIStrings; lang: Lang }) {
   const ref = useRef<NpfaceHandle>(null);
   const theme = usePageTheme();
   useEffect(() => {
-    const id = setInterval(() => setI((v) => (v + 1) % SHOWCASE.length), 2600);
+    const id = setInterval(() => setI((v) => v + 1), 2600);
     return () => clearInterval(id);
   }, []);
-  const state = SHOWCASE[i]!;
+  const state = SHOWCASE[i % SHOWCASE.length]!;
+  // every third expression the helmet morphs into the next face shape
+  const shape = SHAPE_META[Math.floor(i / 3) % SHAPE_META.length]!.name;
   return (
     <section
       id="top"
-      className="mx-auto grid w-full max-w-6xl items-center gap-10 px-5 pt-14 pb-6 md:grid-cols-[1.1fr_1fr] md:pt-20"
+      className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-5 pt-14 pb-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:pt-20"
     >
       <div>
         <div className="flex flex-wrap gap-2">
           <span className="chip">MIT</span>
           <span className="chip">0 deps</span>
-          <span className="chip">~9 KB gz</span>
+          <span className="chip">~12 KB gz</span>
           <span className="chip">React · Vanilla</span>
           <span className="chip">prefers-reduced-motion</span>
         </div>
@@ -66,6 +68,7 @@ export function Hero({ t, lang }: { t: UIStrings; lang: Lang }) {
           <Npface
             ref={ref}
             state={state}
+            shape={shape}
             size={220}
             follow
             label={`npface ${state}`}
@@ -75,6 +78,8 @@ export function Hero({ t, lang }: { t: UIStrings; lang: Lang }) {
         <div className="flex items-center gap-2 font-mono text-sm text-navy/70 dark:text-sand/70">
           <span className="inline-block h-2 w-2 rounded-full bg-lime" />
           face.set(<span className="text-navy dark:text-lime">'{state}'</span>)
+          <span className="opacity-60">· shape</span>
+          <span className="text-navy dark:text-lime">'{shape}'</span>
         </div>
       </div>
     </section>

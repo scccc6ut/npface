@@ -4,6 +4,7 @@ import { ThemeCtx } from './lib/theme';
 import { Header } from './sections/Header';
 import { Hero } from './sections/Hero';
 import { Gallery } from './sections/Gallery';
+import { Shapes } from './sections/Shapes';
 import { Playground } from './sections/Playground';
 import { AgentDemo } from './sections/AgentDemo';
 import { Crew } from './sections/Crew';
@@ -27,6 +28,7 @@ export default function App() {
   const [lang, setLangState] = useState<Lang>(initialLang);
   const [dark, setDarkState] = useState(initialDark);
   const [selected, setSelected] = useState('idle');
+  const [shape, setShape] = useState('square');
   const playgroundRef = useRef<HTMLElement>(null);
   const t = UI[lang];
 
@@ -66,10 +68,21 @@ export default function App() {
               playgroundRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }}
           />
+          <Shapes
+            t={t}
+            lang={lang}
+            current={shape}
+            onPick={(s) => {
+              setShape(s);
+              playgroundRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+          />
           <Playground
             t={t}
             selected={selected}
             setSelected={setSelected}
+            shape={shape}
+            setShape={setShape}
             sectionRef={playgroundRef}
           />
           <AgentDemo t={t} lang={lang} />

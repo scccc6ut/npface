@@ -3,14 +3,16 @@
 **表情头盔 · 会表情的 AI 员工头像** — an expressive, zero-dependency SVG helmet avatar for AI agents.
 
 - 12 semantic states (`idle`, `thinking`, `searching`, `working`, `waiting`, `proud`, `error`, `sad`, `sleep`, `wake`, `happy`, `blink`), aliases, custom states
+- 6 face shapes — `square` (default), `circle`, `triangle`, `hexagon`, `shield`, `diamond` — that morph into each other; register your own
 - Springs, auto-blink, breathing, gaze-follows-pointer, `prefers-reduced-motion` aware, off-screen pause
-- ~9 KB gzip, framework-agnostic (React bindings: [`npface-react`](https://www.npmjs.com/package/npface-react))
+- ~12 KB gzip, framework-agnostic (React bindings: [`npface-react`](https://www.npmjs.com/package/npface-react))
 
 ```ts
 import { createNpface } from 'npface';
 
-const face = createNpface('#avatar', { state: 'idle', size: 48, follow: true });
+const face = createNpface('#avatar', { state: 'idle', shape: 'circle', size: 48, follow: true });
 face.set('thinking');
+face.setShape('hexagon'); // morphs
 face.pulse('proud');
 ```
 

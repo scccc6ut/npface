@@ -25,10 +25,15 @@ export function Header({
           <Npface size={28} follow label="npface" theme={theme} />
           <span>npface</span>
         </a>
-        <span className="hidden text-xs text-navy/60 sm:inline dark:text-sand/60">{t.tagline}</span>
-        <nav className="ml-auto hidden items-center gap-4 text-sm md:flex">
+        <span className="hidden text-xs text-navy/60 2xl:inline dark:text-sand/60">
+          {t.tagline}
+        </span>
+        <nav className="ml-auto hidden items-center gap-4 text-sm whitespace-nowrap lg:flex">
           <a className="hover:underline" href="#states">
             {t.gallery}
+          </a>
+          <a className="hover:underline" href="#shapes">
+            {t.shapes}
           </a>
           <a className="hover:underline" href="#playground">
             {t.playground}
@@ -40,7 +45,7 @@ export function Header({
             {t.crew}
           </a>
         </nav>
-        <div className="ml-auto flex items-center gap-2 md:ml-0">
+        <div className="ml-auto flex shrink-0 items-center gap-2 whitespace-nowrap lg:ml-0">
           <button
             type="button"
             className="btn px-2.5"

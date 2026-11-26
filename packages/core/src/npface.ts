@@ -13,22 +13,15 @@ import type {
   NpfaceOptions,
   Pose,
   SequenceStep,
+  ShapeDef,
   SpringConfig,
   SpringSpec,
   StateDef,
   Theme,
 } from './types';
 import { ALIASES, BASE_EYE, BASE_HEAD, DEFAULT_BLINK, STATES } from './states';
-import {
-  EYE_HOME,
-  HEAD_PIVOT,
-  HELMET_PATH,
-  VIEW,
-  VISOR,
-  crossPath,
-  crossWidth,
-  eyePath,
-} from './geometry';
+import { VIEW, crossPath, crossWidth, eyePath, pointsPath } from './geometry';
+import { resolveShape, type ResolvedShape } from './shapes';
 import { EASE, SPRINGS, SPRING_REDUCED, Spring, clamp, rand, resolveSpring } from './spring';
 import { MotionLayer } from './motion';
 import { now as nowMs, subscribe, unsubscribe } from './ticker';
@@ -103,6 +96,52 @@ const GAZE_HEAD_Y = 0.6;
 type EyeSprings = Record<EyeProp, Spring>;
 type HeadSprings = Record<HeadProp, Spring>;
 
+/** Face-shape values the renderer reads every frame (interpolated while morphing). */
+interface Layout {
+  pts: Float64Array;
+  visor: number[];
+  eyes: number[];
+  eyeScale: number;
+  pivot: number[];
+  zzz: number[];
+}
+
+const layoutOf = (sh: ResolvedShape): Layout => ({
+  pts: Float64Array.from(sh.pts),
+  visor: [...sh.visor],
+  eyes: [...sh.eyes],
+  eyeScale: sh.eyeScale,
+  pivot: [...sh.pivot],
+  zzz: [...sh.zzz],
+});
+
+function lerpInto(
+  out: number[] | Float64Array,
+  a: ArrayLike<number>,
+  b: ArrayLike<number>,
+  t: number,
+): void {
+  for (let i = 0; i < out.length; i++) out[i] = a[i]! + (b[i]! - a[i]!) * t;
+}
+
+/** `out = a + (b - a) · t` for every layout value; `lerpLayout(out, out, b, 1)` copies `b`. */
+function lerpLayout(out: Layout, a: Layout, b: ResolvedShape, t: number): void {
+  lerpInto(out.pts, a.pts, b.pts, t);
+  lerpInto(out.visor, a.visor, b.visor, t);
+  lerpInto(out.eyes, a.eyes, b.eyes, t);
+  out.eyeScale = a.eyeScale + (b.eyeScale - a.eyeScale) * t;
+  lerpInto(out.pivot, a.pivot, b.pivot, t);
+  lerpInto(out.zzz, a.zzz, b.zzz, t);
+}
+
+const sameShape = (a: ResolvedShape, b: ResolvedShape): boolean =>
+  a.path === b.path &&
+  a.eyeScale === b.eyeScale &&
+  String([a.visor, a.eyes, a.pivot, a.zzz]) === String([b.visor, b.eyes, b.pivot, b.zzz]);
+
+/** Shape morph: quick, with a hint of overshoot so the helmet feels a little like jelly. */
+const SPRING_MORPH: SpringConfig = { stiffness: 200, damping: 21 };
+
 function svg<K extends keyof SVGElementTagNameMap>(
   tag: K,
   attrs?: Record<string, string | number>,
@@ -142,7 +181,6 @@ export function resolveDef(def: StateDef, registry: Record<string, StateDef>, de
   return out;
 }
 
-/** Canonical state name for `name` (alias-aware); unknown names fall back to `idle`. */
 /** `searchDocs`, `search_docs`, `Search Docs` → `search-docs`. */
 export function normalizeStateName(name: string): string {
   return (name || '')
@@ -183,6 +221,7 @@ export class NpfaceInstance implements Npface {
   private readonly root: SVGGElement;
   private readonly body: SVGPathElement;
   private readonly visor: SVGRectElement;
+  private readonly visorClip: SVGRectElement;
   private readonly eyeL: SVGPathElement;
   private readonly eyeR: SVGPathElement;
   private readonly crossL: SVGPathElement;
@@ -237,6 +276,12 @@ export class NpfaceInstance implements Npface {
   private nextTimer: ReturnType<typeof setTimeout> | null = null;
   private destroyed = false;
 
+  private shapeTo: ResolvedShape;
+  private morphFrom: Layout | null = null;
+  private readonly morphT = new Spring(1, SPRING_MORPH);
+  private readonly lay: Layout;
+  private shapeDirty = true;
+
   private lastD = ['', '', '', ''];
   private lastHead = '';
   /** force a full render on the next frame (initial paint, snaps) */
@@ -254,12 +299,17 @@ export class NpfaceInstance implements Npface {
     this.label = opts.label;
     this.onChange = opts.onChange;
 
+    const shape = resolveShape(opts.shape);
+    this.shapeTo = shape;
+    this.lay = layoutOf(shape);
+
     /* ----- DOM ----- */
     const el = svg('svg', {
       viewBox: `0 0 ${VIEW} ${VIEW}`,
       role: 'img',
       class: 'npface',
       'aria-label': opts.label ?? 'idle',
+      'data-shape': shape.name,
     });
     el.style.display = 'inline-block';
     el.style.verticalAlign = 'middle';
@@ -269,29 +319,13 @@ export class NpfaceInstance implements Npface {
 
     const root = svg('g', { class: 'npface-head' });
     this.root = root;
-    this.body = svg('path', { class: 'npface-body', d: HELMET_PATH });
-    this.visor = svg('rect', {
-      class: 'npface-visor',
-      x: VISOR.x,
-      y: VISOR.y,
-      width: VISOR.w,
-      height: VISOR.h,
-      rx: VISOR.h / 2,
-      ry: VISOR.h / 2,
-    });
+    this.body = svg('path', { class: 'npface-body' });
+    this.visor = svg('rect', { class: 'npface-visor' });
     // eyes are clipped by the visor slot
     const clipId = 'npface-clip-' + (++uid).toString(36);
     const clip = svg('clipPath', { id: clipId });
-    clip.appendChild(
-      svg('rect', {
-        x: VISOR.x,
-        y: VISOR.y,
-        width: VISOR.w,
-        height: VISOR.h,
-        rx: VISOR.h / 2,
-        ry: VISOR.h / 2,
-      }),
-    );
+    this.visorClip = svg('rect');
+    clip.appendChild(this.visorClip);
     const defs = svg('defs');
     defs.appendChild(clip);
     const eyes = svg('g', { class: 'npface-eyes', 'clip-path': `url(#${clipId})` });
@@ -309,6 +343,7 @@ export class NpfaceInstance implements Npface {
     root.append(this.body, this.visor, eyes);
     el.append(defs, root);
     container.appendChild(el);
+    this.renderShape();
 
     this.setSize(opts.size ?? 48);
     this.applyColors();
@@ -318,6 +353,7 @@ export class NpfaceInstance implements Npface {
       this.rm = reducedMotionQuery.matches();
       this.unRm = reducedMotionQuery.on((m) => {
         this.rm = m;
+        if (m) this.finishMorph();
         this.applyState(this._state, true);
       });
     } else this.rm = this.rmOpt;
@@ -401,6 +437,37 @@ export class NpfaceInstance implements Npface {
       this.blinkDouble = false;
       this.wake();
     }
+  }
+
+  get shape(): string {
+    return this.shapeTo.name;
+  }
+
+  setShape(shape: string | ShapeDef, opts?: { immediate?: boolean }): void {
+    if (this.destroyed) return;
+    const next = resolveShape(shape);
+    if (next === this.shapeTo || sameShape(next, this.shapeTo)) return;
+    this.shapeTo = next;
+    this.el.setAttribute('data-shape', next.name);
+    if (opts?.immediate || this.rm) {
+      this.finishMorph();
+    } else {
+      // morph from whatever is on screen now (possibly mid-morph) to the new shape
+      this.morphFrom = {
+        pts: Float64Array.from(this.lay.pts),
+        visor: [...this.lay.visor],
+        eyes: [...this.lay.eyes],
+        eyeScale: this.lay.eyeScale,
+        pivot: [...this.lay.pivot],
+        zzz: [...this.lay.zzz],
+      };
+      this.morphT.snap(0);
+      this.morphT.set(1);
+      // a little squash & stretch so the change feels physical
+      this.sh.sx.vel -= 0.8;
+      this.sh.sy.vel += 0.8;
+    }
+    this.wake();
   }
 
   setColors(colors: Partial<NpfaceColors>): void {
@@ -683,10 +750,11 @@ export class NpfaceInstance implements Npface {
       return false;
     }
     const animating = !this.rm || z.w.moving;
+    const [zx, zy] = this.lay.zzz as [number, number];
     for (let i = 0; i < 3; i++) {
       const u = this.rm ? 0.25 + i * 0.25 : (((now / 2600 + i / 3) % 1) + 1) % 1;
-      const x = 83 + 13 * u;
-      const y = 15 - 24 * u;
+      const x = zx + 13 * u;
+      const y = zy - 24 * u;
       const op = Math.sin(Math.PI * u) * w;
       const tx = z.t[i]!;
       tx.setAttribute('x', x.toFixed(1));
@@ -801,9 +869,22 @@ export class NpfaceInstance implements Npface {
     if (this.destroyed) return;
     this.advanceSequence(now);
 
+    // 0. face-shape morph
+    if (this.morphFrom) {
+      this.morphT.step(dt);
+      if (this.morphT.moving) lerpLayout(this.lay, this.morphFrom, this.shapeTo, this.morphT.v);
+      else this.finishMorph();
+      this.shapeDirty = true;
+    }
+    const shapeChanged = this.shapeDirty;
+    if (shapeChanged) {
+      this.renderShape();
+      this.shapeDirty = false;
+    }
+
     // 1. springs → base pose
-    let eyesDirty = this.dirty;
-    let headDirty = this.dirty;
+    let eyesDirty = this.dirty || shapeChanged;
+    let headDirty = this.dirty || shapeChanged;
     this.dirty = false;
     const p = this.pose;
     for (const k of EYE_PROPS) {
@@ -854,6 +935,7 @@ export class NpfaceInstance implements Npface {
       headDirty ||
       anyLayer ||
       zzzActive ||
+      !!this.morphFrom ||
       !!this.seq ||
       this.blinkStart >= 0 ||
       g !== 0 ||
@@ -870,25 +952,48 @@ export class NpfaceInstance implements Npface {
     }
   };
 
+  /** Jump to the target shape (end of a morph, `immediate`, reduced motion). */
+  private finishMorph(): void {
+    this.morphFrom = null;
+    this.morphT.snap(1);
+    lerpLayout(this.lay, this.lay, this.shapeTo, 1);
+    this.shapeDirty = true;
+  }
+
+  /** Helmet outline, visor and eye clip from the current layout. */
+  private renderShape(): void {
+    const L = this.lay;
+    this.body.setAttribute('d', this.morphFrom ? pointsPath(L.pts) : this.shapeTo.path);
+    const [x, y, w, h] = L.visor as [number, number, number, number];
+    for (const r of [this.visor, this.visorClip]) {
+      r.setAttribute('x', x.toFixed(2));
+      r.setAttribute('y', y.toFixed(2));
+      r.setAttribute('width', w.toFixed(2));
+      r.setAttribute('height', h.toFixed(2));
+      r.setAttribute('rx', (h / 2).toFixed(2));
+      r.setAttribute('ry', (h / 2).toFixed(2));
+    }
+  }
+
   private renderEyes(blink: number): void {
     const p = this.pose;
-    const [lx, ly] = EYE_HOME[0];
-    const [rx, ry] = EYE_HOME[1];
-    const d0 = eyePath(p.l, false, lx, ly, blink);
-    const d1 = eyePath(p.r, true, rx, ry, blink);
-    const d2 = crossPath(p.l, false, lx, ly);
-    const d3 = crossPath(p.r, true, rx, ry);
+    const [lx, ly, rx, ry] = this.lay.eyes as [number, number, number, number];
+    const k = this.lay.eyeScale;
+    const d0 = eyePath(p.l, false, lx, ly, blink, k);
+    const d1 = eyePath(p.r, true, rx, ry, blink, k);
+    const d2 = crossPath(p.l, false, lx, ly, k);
+    const d3 = crossPath(p.r, true, rx, ry, k);
     const L = this.lastD;
     if (d0 !== L[0]) this.eyeL.setAttribute('d', (L[0] = d0));
     if (d1 !== L[1]) this.eyeR.setAttribute('d', (L[1] = d1));
     if (d2 !== L[2]) {
       this.crossL.setAttribute('d', (L[2] = d2));
-      this.crossL.setAttribute('stroke-width', crossWidth(p.l).toFixed(2));
+      this.crossL.setAttribute('stroke-width', crossWidth(p.l, k).toFixed(2));
       this.crossL.setAttribute('opacity', clamp(p.l.cross, 0, 1).toFixed(2));
     }
     if (d3 !== L[3]) {
       this.crossR.setAttribute('d', (L[3] = d3));
-      this.crossR.setAttribute('stroke-width', crossWidth(p.r).toFixed(2));
+      this.crossR.setAttribute('stroke-width', crossWidth(p.r, k).toFixed(2));
       this.crossR.setAttribute('opacity', clamp(p.r.cross, 0, 1).toFixed(2));
     }
     const fl = clamp(p.l.fill, 0, 1).toFixed(2);
@@ -899,10 +1004,10 @@ export class NpfaceInstance implements Npface {
 
   private renderHead(): void {
     const h = this.pose.head;
-    const [px, py] = HEAD_PIVOT;
+    const [px, py] = this.lay.pivot as [number, number];
     const t =
       `translate(${(px + h.x).toFixed(2)} ${(py + h.y).toFixed(2)}) rotate(${h.rot.toFixed(2)}) ` +
-      `scale(${h.sx.toFixed(3)} ${h.sy.toFixed(3)}) translate(${-px} ${-py})`;
+      `scale(${h.sx.toFixed(3)} ${h.sy.toFixed(3)}) translate(${(-px).toFixed(2)} ${(-py).toFixed(2)})`;
     if (t !== this.lastHead) this.root.setAttribute('transform', (this.lastHead = t));
   }
 

@@ -83,7 +83,7 @@ export function AgentDemo({ t, lang }: { t: UIStrings; lang: Lang }) {
 
   return (
     <Section id="agent" title={t.agent} body={t.agentBody}>
-      <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="card flex flex-col p-4">
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <button

@@ -140,3 +140,57 @@ export const COLOR_PRESETS: {
   { name: 'lime-visor', colors: { body: '#0f1d3a', visor: '#c7f636', eye: '#0f1d3a' } },
   { name: 'sky', colors: { body: '#12315c', visor: '#eaf4ff', eye: '#63b3ff' } },
 ];
+
+export interface ShapeMeta {
+  name: string;
+  en: string;
+  zh: string;
+  descEn: string;
+  descZh: string;
+}
+
+/** Face shapes — square is the npcrew default. Role hints are suggestions only. */
+export const SHAPE_META: ShapeMeta[] = [
+  {
+    name: 'square',
+    en: 'Square',
+    zh: '方形',
+    descEn: 'The npcrew helmet — the default.',
+    descZh: 'npcrew 头盔，默认脸型。',
+  },
+  {
+    name: 'circle',
+    en: 'Circle',
+    zh: '圆形',
+    descEn: 'Soft and friendly — support & companion agents.',
+    descZh: '圆润亲和——适合客服、陪伴类员工。',
+  },
+  {
+    name: 'triangle',
+    en: 'Triangle',
+    zh: '三角',
+    descEn: 'Onigiri-cute, eyes sit low — creative roles.',
+    descZh: '饭团造型，眼睛靠下——适合创意类员工。',
+  },
+  {
+    name: 'hexagon',
+    en: 'Hexagon',
+    zh: '六边形',
+    descEn: 'Engineered and solid — dev & ops agents.',
+    descZh: '工程感十足——适合研发、运维类员工。',
+  },
+  {
+    name: 'shield',
+    en: 'Shield',
+    zh: '盾形',
+    descEn: 'A guardian badge — security & compliance.',
+    descZh: '守护徽章——适合安全、合规类员工。',
+  },
+  {
+    name: 'diamond',
+    en: 'Diamond',
+    zh: '菱形',
+    descEn: 'Sharp and premium — sales & VIP concierge.',
+    descZh: '锐利精致——适合销售、VIP 管家类员工。',
+  },
+];

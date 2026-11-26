@@ -182,6 +182,29 @@ export interface StateDef {
 
 export type Theme = 'light' | 'dark' | 'auto';
 
+/**
+ * A face shape (helmet silhouette). Coordinates live in the 100×100 viewBox; the default
+ * `square` is `outline: [[6,6,17],[94,6,17],[94,94,17],[6,94,17]]` with
+ * `visor: { x: 12, y: 36, w: 76, h: 24 }`.
+ */
+export interface ShapeDef {
+  /**
+   * Helmet outline: rounded-polygon vertices `[x, y, cornerRadius]` listed clockwise,
+   * or an ellipse `{ cx, cy, rx, ry }`.
+   */
+  outline: [number, number, number][] | { cx: number; cy: number; rx: number; ry: number };
+  /** Visor slot (a stadium). The eyes are clipped by it. */
+  visor: { x: number; y: number; w: number; h: number };
+  /** Eye centres `[left, right]`. Default: placed inside the visor like the square. */
+  eyes?: [[number, number], [number, number]];
+  /** Eye size multiplier. Default: `visor.h / 24`. */
+  eyeScale?: number;
+  /** Pivot for head rotation and squash ("neck"). Default: 12 units above the bottom centre. */
+  pivot?: [number, number];
+  /** Where the sleeping "z z z" start. Default: near the top-right of the outline. */
+  zzz?: [number, number];
+}
+
 export interface NpfaceColors {
   /** Helmet body. */
   body: string;
@@ -202,6 +225,12 @@ export interface NpfaceOptions {
   emotion?: string;
   /** Rendered size — a number of CSS px or any CSS length string. Default 48. */
   size?: number | string;
+  /**
+   * Face shape: `'square'` (default, the npcrew helmet), `'circle'`, `'triangle'`, `'hexagon'`,
+   * `'shield'`, `'diamond'`, a name passed to `registerShape()`, or a `ShapeDef`.
+   * Unknown names fall back to `'square'`.
+   */
+  shape?: string | ShapeDef;
   colors?: Partial<NpfaceColors>;
   /** `'auto'` follows `prefers-color-scheme`. Default `'auto'`. */
   theme?: Theme;
@@ -228,6 +257,8 @@ export interface Npface {
   readonly el: SVGSVGElement;
   /** Current state name. */
   readonly state: string;
+  /** Current face-shape name (`'custom'` for an inline `ShapeDef`). */
+  readonly shape: string;
   /** Switch state (with transition). `immediate: true` snaps without animation. */
   set(state: string, opts?: { immediate?: boolean }): void;
   /** Play a state once, then return to the previous state. */
@@ -238,6 +269,8 @@ export interface Npface {
   look(x: number | null, y?: number): void;
   /** Trigger a single blink now. */
   blink(): void;
+  /** Change the face shape — morphs smoothly; `immediate: true` (or reduced motion) snaps. */
+  setShape(shape: string | ShapeDef, opts?: { immediate?: boolean }): void;
   setColors(colors: Partial<NpfaceColors>): void;
   setSize(size: number | string): void;
   setTheme(theme: Theme): void;

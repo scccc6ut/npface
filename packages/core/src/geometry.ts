@@ -1,14 +1,14 @@
 /**
- * npface geometry — all original. The helmet is a rounded square with a stadium-shaped visor slot
- * and two rounded-square eyes (the npcrew mark). Eyes are generated procedurally from `EyeShape`
- * parameters. Flat, 2D — like the brand mark.
+ * npface geometry — all original. The default helmet is a rounded square with a stadium-shaped
+ * visor slot and two rounded-square eyes (the npcrew mark); other face shapes live in shapes.ts.
+ * Eyes are generated procedurally from `EyeShape` parameters. Flat, 2D — like the brand mark.
  */
 import type { EyeShape } from './types';
 
 /** ViewBox edge length. */
 export const VIEW = 100;
 
-/** Helmet body: a symmetric rounded square (no chamfer, no lean). */
+/** Default helmet body (`square` shape): a symmetric rounded square. */
 export const HELMET = { x: 6, y: 6, w: 88, h: 88, r: 17 };
 /** Visor slot (stadium), centred. */
 export const VISOR = { x: 12, y: 36, w: 76, h: 24 };
@@ -73,6 +73,146 @@ export function roundedRectPath(x: number, y: number, w: number, h: number, r: n
 }
 
 export const HELMET_PATH = roundedRectPath(HELMET.x, HELMET.y, HELMET.w, HELMET.h, HELMET.r);
+
+/* ---------------- face-shape outlines ---------------- */
+
+/**
+ * Every outline is resampled to this many points, starting at the top centre and running
+ * clockwise — equal counts + a shared start make any two shapes morphable point-by-point.
+ */
+export const OUTLINE_POINTS = 120;
+
+/** Exact SVG path of an ellipse (used for static display of round shapes). */
+export function ellipsePath(cx: number, cy: number, rx: number, ry: number): string {
+  return (
+    `M${f(cx)} ${f(cy - ry)}A${f(rx)} ${f(ry)} 0 1 1 ${f(cx)} ${f(cy + ry)}` +
+    `A${f(rx)} ${f(ry)} 0 1 1 ${f(cx)} ${f(cy - ry)}Z`
+  );
+}
+
+/** Dense points along a rounded polygon: one arc per corner, straight edges in between. */
+export function roundedPolygonPoints(verts: [number, number, number][]): number[] {
+  const out: number[] = [];
+  const n = verts.length;
+  for (let i = 0; i < n; i++) {
+    const [px, py] = verts[(i + n - 1) % n]!;
+    const [vx, vy, r] = verts[i]!;
+    const [nx, ny] = verts[(i + 1) % n]!;
+    let ax = px - vx,
+      ay = py - vy,
+      bx = nx - vx,
+      by = ny - vy;
+    const la = Math.hypot(ax, ay) || 1;
+    const lb = Math.hypot(bx, by) || 1;
+    ax /= la;
+    ay /= la;
+    bx /= lb;
+    by /= lb;
+    const theta = Math.acos(Math.max(-1, Math.min(1, ax * bx + ay * by)));
+    if (r <= 0 || theta < 1e-6) {
+      out.push(vx, vy);
+      continue;
+    }
+    const t = r / Math.tan(theta / 2);
+    let mx = ax + bx,
+      my = ay + by;
+    const lm = Math.hypot(mx, my) || 1;
+    mx /= lm;
+    my /= lm;
+    const dc = r / Math.sin(theta / 2);
+    const cx = vx + mx * dc,
+      cy = vy + my * dc;
+    const a1 = Math.atan2(vy + ay * t - cy, vx + ax * t - cx);
+    let da = Math.atan2(vy + by * t - cy, vx + bx * t - cx) - a1;
+    while (da > Math.PI) da -= 2 * Math.PI;
+    while (da < -Math.PI) da += 2 * Math.PI;
+    const steps = Math.max(2, Math.ceil((Math.abs(da) * r) / 0.6));
+    for (let k = 0; k <= steps; k++) {
+      const a = a1 + (da * k) / steps;
+      out.push(cx + r * Math.cos(a), cy + r * Math.sin(a));
+    }
+  }
+  return out;
+}
+
+/** Dense points along an ellipse, clockwise on screen from the top. */
+export function ellipsePoints(cx: number, cy: number, rx: number, ry: number): number[] {
+  const out: number[] = [];
+  const steps = 360;
+  for (let k = 0; k < steps; k++) {
+    const a = -Math.PI / 2 + (2 * Math.PI * k) / steps;
+    out.push(cx + rx * Math.cos(a), cy + ry * Math.sin(a));
+  }
+  return out;
+}
+
+/**
+ * Resample a closed outline (flat `[x0, y0, x1, y1, …]`) into `n` points evenly spaced by arc
+ * length, clockwise on screen, starting at the topmost crossing of the vertical centre line.
+ */
+export function resampleOutline(raw: number[], n = OUTLINE_POINTS): Float64Array {
+  const m = raw.length / 2;
+  const X = (i: number) => raw[2 * (((i % m) + m) % m)]!;
+  const Y = (i: number) => raw[2 * (((i % m) + m) % m) + 1]!;
+  let area = 0;
+  let minX = Infinity,
+    maxX = -Infinity;
+  for (let i = 0; i < m; i++) {
+    area += X(i) * Y(i + 1) - X(i + 1) * Y(i);
+    if (X(i) < minX) minX = X(i);
+    if (X(i) > maxX) maxX = X(i);
+  }
+  // y points down, so a positive shoelace sum means clockwise on screen
+  const dir = area >= 0 ? 1 : -1;
+  const at = (k: number) => (dir > 0 ? k : -k);
+  const cx = (minX + maxX) / 2;
+  let start = 0,
+    sx = X(0),
+    sy = Infinity;
+  for (let k = 0; k < m; k++) {
+    const x1 = X(at(k)),
+      y1 = Y(at(k)),
+      x2 = X(at(k + 1)),
+      y2 = Y(at(k + 1));
+    if ((x1 - cx) * (x2 - cx) > 0 || x1 === x2) continue;
+    const y = y1 + ((cx - x1) / (x2 - x1)) * (y2 - y1);
+    if (y < sy) {
+      sy = y;
+      sx = cx;
+      start = k;
+    }
+  }
+  // walk once around from the start crossing, back to it
+  const seq: number[] = [sx, sy];
+  for (let k = 1; k <= m; k++) seq.push(X(at(start + k)), Y(at(start + k)));
+  seq.push(sx, sy);
+  const cum = [0];
+  for (let i = 1; i < seq.length / 2; i++) {
+    cum.push(
+      cum[i - 1]! + Math.hypot(seq[2 * i]! - seq[2 * i - 2]!, seq[2 * i + 1]! - seq[2 * i - 1]!),
+    );
+  }
+  const total = cum[cum.length - 1]!;
+  const out = new Float64Array(2 * n);
+  let seg = 1;
+  for (let k = 0; k < n; k++) {
+    const s = (total * k) / n;
+    while (seg < cum.length - 1 && cum[seg]! < s) seg++;
+    const s0 = cum[seg - 1]!,
+      s1 = cum[seg]!;
+    const u = s1 > s0 ? (s - s0) / (s1 - s0) : 0;
+    out[2 * k] = seq[2 * seg - 2]! + (seq[2 * seg]! - seq[2 * seg - 2]!) * u;
+    out[2 * k + 1] = seq[2 * seg - 1]! + (seq[2 * seg + 1]! - seq[2 * seg - 1]!) * u;
+  }
+  return out;
+}
+
+/** Polyline path through flat outline points (used while morphing between shapes). */
+export function pointsPath(pts: ArrayLike<number>): string {
+  let d = '';
+  for (let i = 0; i < pts.length; i += 2) d += (i ? 'L' : 'M') + f(pts[i]!) + ' ' + f(pts[i + 1]!);
+  return d + 'Z';
+}
 
 /* ---------------- eyes ---------------- */
 
@@ -145,6 +285,7 @@ const DEG = Math.PI / 180;
  * @param right  true for the right eye — mirrored props (`rot`, tilts) are flipped here
  * @param hx,hy  home position of the eye centre
  * @param blink  0..1 extra top-lid closure from an ongoing blink
+ * @param scale  size multiplier for the face shape (scales size and offsets, not lids or angles)
  */
 export function eyePath(
   e: EyeShape,
@@ -152,9 +293,10 @@ export function eyePath(
   hx: number,
   hy: number,
   blink: number,
+  scale = 1,
 ): string {
-  const w = e.w,
-    h = e.h;
+  const w = e.w * scale,
+    h = e.h * scale;
   if (w <= 0.05 || h <= 0.05) return '';
   const a = w / 2,
     b = h / 2;
@@ -174,8 +316,8 @@ export function eyePath(
   const rot = (right ? -e.rot : e.rot) * DEG;
   const cos = Math.cos(rot);
   const sin = Math.sin(rot);
-  const cx = hx + e.x;
-  const cy = hy + e.y;
+  const cx = hx + e.x * scale;
+  const cy = hy + e.y * scale;
 
   let d = '';
   for (let i = 0; i < N_PTS; i++) {
@@ -198,17 +340,18 @@ export function eyePath(
 }
 
 /** Path for the dizzy "X" overlay of one eye (two strokes). Empty when `cross` ≈ 0. */
-export function crossPath(e: EyeShape, right: boolean, hx: number, hy: number): string {
+export function crossPath(e: EyeShape, right: boolean, hx: number, hy: number, scale = 1): string {
   if (e.cross < 0.01) return '';
-  const s = Math.min(e.w, e.h) * 0.42 * e.cross;
+  const s = Math.min(e.w, e.h) * scale * 0.42 * e.cross;
   const rot = (right ? -e.rot : e.rot) * DEG;
   const cos = Math.cos(rot);
   const sin = Math.sin(rot);
-  const cx = hx + e.x;
-  const cy = hy + e.y;
+  const cx = hx + e.x * scale;
+  const cy = hy + e.y * scale;
   const P = (x: number, y: number) => f(x * cos - y * sin + cx) + ' ' + f(x * sin + y * cos + cy);
   return 'M' + P(-s, -s) + 'L' + P(s, s) + 'M' + P(s, -s) + 'L' + P(-s, s);
 }
 
 /** Stroke width of the X, relative to eye size. */
-export const crossWidth = (e: EyeShape): number => Math.max(1.2, Math.min(e.w, e.h) * 0.2);
+export const crossWidth = (e: EyeShape, scale = 1): number =>
+  Math.max(1.2, Math.min(e.w, e.h) * scale * 0.2);

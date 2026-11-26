@@ -11,6 +11,11 @@ export const UI = {
     gallery: 'States',
     galleryBody:
       'Click any card to load it into the playground. Every expression is made of two eyes, the visor and a bit of helmet motion — nothing else.',
+    shapes: 'Face shapes',
+    shapesBody:
+      'Five new silhouettes next to the npcrew square. Every expression works in every shape and switching morphs smoothly — click one to load it into the playground.',
+    shape: 'Face shape',
+    morphHint: 'Auto-morphing through every shape',
     playground: 'Playground',
     playgroundBody:
       'Mix states, colours, size, gaze and motion settings — copy the snippet when it looks right.',
@@ -69,6 +74,11 @@ export const UI = {
     gallery: '状态一览',
     galleryBody:
       '点击任意卡片，把它载入下方的调试台。所有表情只靠两只眼睛、护目镜和头盔的小动作表达。',
+    shapes: '脸型',
+    shapesBody:
+      '在 npcrew 方形头盔之外新增五种脸型。所有表情在每种脸型上都能用，切换时平滑变形——点击任意脸型即可载入调试台。',
+    shape: '脸型',
+    morphHint: '在所有脸型间自动变形',
     playground: '调试台',
     playgroundBody: '组合状态、配色、尺寸、视线与动效设置——满意后复制代码片段。',
     state: '状态',

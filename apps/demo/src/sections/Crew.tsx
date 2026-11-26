@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Npface } from 'npface-react';
-import { SHOWCASE } from '../lib/meta';
+import { SHAPE_META, SHOWCASE } from '../lib/meta';
 import type { UIStrings } from '../lib/i18n';
 import { Section } from '../components/Section';
 import { usePageTheme } from '../lib/theme';
@@ -31,11 +31,13 @@ export function Crew({ t }: { t: UIStrings }) {
   const fps = useFps();
   const theme = usePageTheme();
   const members = useMemo(() => {
-    const out: { id: number; state: string }[] = [];
+    const out: { id: number; state: string; shape: string }[] = [];
     let s = 7;
+    const next = () => (s = (s * 9301 + 49297) % 233280) / 233280;
     for (let i = 0; i < count; i++) {
-      s = (s * 9301 + 49297) % 233280;
-      out.push({ id: i, state: SHOWCASE[Math.floor((s / 233280) * SHOWCASE.length)]! });
+      const state = SHOWCASE[Math.floor(next() * SHOWCASE.length)]!;
+      const shape = SHAPE_META[Math.floor(next() * SHAPE_META.length)]!.name;
+      out.push({ id: i, state, shape });
     }
     return out;
   }, [count]);
@@ -56,7 +58,14 @@ export function Crew({ t }: { t: UIStrings }) {
         <div className="grid grid-cols-[repeat(auto-fill,minmax(44px,1fr))] gap-2">
           {members.map((m) => (
             <div key={m.id} className="flex justify-center">
-              <Npface state={m.state} size={40} follow label={m.state} theme={theme} />
+              <Npface
+                state={m.state}
+                shape={m.shape}
+                size={40}
+                follow
+                label={`${m.shape} ${m.state}`}
+                theme={theme}
+              />
             </div>
           ))}
         </div>
