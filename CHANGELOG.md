@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-11-26
 
 - **Face shapes.** New `shape` option, `setShape()` and `registerShape()`. Six character shapes join the npcrew `square` (still the default): `shield`, `ghost`, `cat`, `circle` (with a little moon), `drop` and `crown`, drawn from the npcrew brand sketches. Aliases include Chinese ones such as `猫咪` and `皇冠`. Each shape tunes its own visor, eye placement and size, head pivot and z z z anchor. Switching morphs the helmet (outlines are resampled to 120 points from a shared start; detached dots grow or shrink in place) and snaps under reduced motion. Custom outlines can be SVG path data (parsed without the DOM), rounded polygons or ellipses (`ShapeDef`), plus optional `dots`.
 - `npface-react`: `shape` prop.

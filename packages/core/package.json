@@ -1,6 +1,6 @@
 {
   "name": "npface",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "表情头盔 · 会表情的 AI 员工头像 — an expressive, zero-dependency SVG helmet avatar for AI agents (12 semantic states, springs, gaze, reduced-motion aware)",
   "keywords": [
     "avatar",
