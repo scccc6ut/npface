@@ -9,7 +9,7 @@
   <a href="https://github.com/scccc6ut/npface/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/scccc6ut/npface/actions/workflows/ci.yml/badge.svg" /></a>
   <a href="https://www.npmjs.com/package/npface"><img alt="npm" src="https://img.shields.io/npm/v/npface?label=npface" /></a>
   <a href="https://www.npmjs.com/package/npface-react"><img alt="npm" src="https://img.shields.io/npm/v/npface-react?label=npface-react" /></a>
-  <img alt="gzip" src="https://img.shields.io/badge/core-~12%20KB%20gzip-c7f636" />
+  <img alt="gzip" src="https://img.shields.io/badge/core-~14%20KB%20gzip-c7f636" />
   <img alt="deps" src="https://img.shields.io/badge/dependencies-0-0f1d3a" />
   <a href="./LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-blue" /></a>
 </p>
@@ -35,8 +35,8 @@ face.set('thinking'); // → idle → thinking → search-docs → search-web �
 ```
 
 - **13 states**: `sleep · wake · idle · blink · happy · proud (complete) · thinking · search-docs · search-web · working · waiting · error (dizzy) · sad (tired)` — plus aliases (`searching`, `rag`, `browsing`, `tired` …; `searchDocs` / `search_docs` are normalised too), unknown names fall back to `idle`, and you can register your own.
-- **6 face shapes**: the npcrew `square` (default) plus `circle`, `triangle`, `hexagon`, `shield` and `diamond`. Every expression works in every shape, `setShape()` morphs between them, and you can register your own.
-- **Zero dependencies**, framework-agnostic core (plain SVG/DOM, built-in springs & easing, one shared `requestAnimationFrame` loop). **~12 KB gzip.**
+- **7 face shapes**: the npcrew `square` (default) plus `shield`, `ghost`, `cat`, `circle` (with a little moon), `drop` and `crown`. Every expression works in every shape, `setShape()` morphs between them, and you can register your own from SVG path data.
+- **Zero dependencies**, framework-agnostic core (plain SVG/DOM, built-in springs & easing, one shared `requestAnimationFrame` loop). **~14 KB gzip.**
 - **React bindings** (`npface-react`): `<Npface state="working" />`. Vue can follow.
 - **Alive by default**: breathing, random glances, auto-blink, per-state rhythm; optional **eyes-follow-pointer**.
 - **Considerate**: pauses off-screen (IntersectionObserver), honours `prefers-reduced-motion` (static poses + minimal transitions), `role="img"` + `aria-label`.
@@ -109,7 +109,7 @@ export function Employee({ status }: { status: string }) {
 | ------------------- | -------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `state` / `emotion` | `string`                         | `'idle'`      | initial state (aliases ok, unknown → `idle`)                                                                                                        |
 | `size`              | `number \| string`               | `48`          | px or CSS length (`'100%'`, `'3rem'`)                                                                                                               |
-| `shape`             | `string \| ShapeDef`             | `'square'`    | face shape: `square` · `circle` · `triangle` · `hexagon` · `shield` · `diamond`, a registered name or a `ShapeDef` (aliases ok, unknown → `square`) |
+| `shape`             | `string \| ShapeDef`             | `'square'`    | face shape: `square` · `shield` · `ghost` · `cat` · `circle` · `drop` · `crown`, a registered name or a `ShapeDef` (aliases ok, unknown → `square`) |
 | `colors`            | `{ body, visor, eye, rim, zzz }` | brand palette | any subset; `rim` is an optional helmet outline                                                                                                     |
 | `theme`             | `'light' \| 'dark' \| 'auto'`    | `'auto'`      | picks the default palette (`auto` = `prefers-color-scheme`)                                                                                         |
 | `follow` / `gaze`   | `boolean`                        | `false`       | eyes (and a bit of head) follow the pointer                                                                                                         |
@@ -161,42 +161,43 @@ The previews above are animated SVGs recorded from the engine itself (`pnpm asse
 ### Face shapes
 
 <p>
-  <img src="./assets/shapes.svg" alt="square, circle, triangle, hexagon, shield, diamond" width="560" />
+  <img src="./assets/shapes.svg" alt="square, shield, ghost, cat, circle, drop, crown" width="640" />
   <img src="./assets/morph.svg" alt="npface morphing through its face shapes" width="112" />
 </p>
 
-The npcrew rounded square is the default, and five more silhouettes ship with the library. Every expression works in every shape: the visor, eye placement and size, head pivot and the "z z z" anchor are tuned per shape. Switching morphs the helmet smoothly, with a quick spring and a little squash-and-stretch; under reduced motion it snaps.
+The npcrew rounded square is the default, and six character shapes ship with the library. Every expression works in every shape: the visor, eye placement and size, head pivot and the "z z z" anchor are tuned per shape. Switching morphs the helmet smoothly, with a quick spring and a little squash-and-stretch; under reduced motion it snaps.
 
-| shape      | feel                                          | aliases                     |
-| ---------- | --------------------------------------------- | --------------------------- |
-| `square`   | the npcrew helmet (default)                   | `default`, `helmet`, `方形` |
-| `circle`   | soft and friendly: support & companion agents | `round`, `圆形`             |
-| `triangle` | onigiri-cute, eyes sit low: creative roles    | `tri`, `onigiri`, `三角`    |
-| `hexagon`  | engineered and solid: dev & ops agents        | `hex`, `六边形`             |
-| `shield`   | a guardian badge: security & compliance       | `badge`, `盾形`, `盾牌`     |
-| `diamond`  | sharp and premium: sales & VIP concierge      | `rhombus`, `gem`, `菱形`    |
+| shape    | look                           | feel (suggestion)                          | aliases                           |
+| -------- | ------------------------------ | ------------------------------------------ | --------------------------------- |
+| `square` | rounded square (default)       | the npcrew helmet                          | `default`, `helmet`, `方形`       |
+| `shield` | heater shield with a soft peak | guardian: security & compliance            | `badge`, `盾牌`, `盾形`           |
+| `ghost`  | round top, scalloped hem       | playful: creative & content                | `boo`, `幽灵`                     |
+| `cat`    | rounded ears, full cheeks      | approachable: community & customer care    | `kitty`, `neko`, `猫咪`, `猫`     |
+| `circle` | round face with a little moon  | friendly: companions & assistants          | `round`, `planet`, `圆形`, `星球` |
+| `drop`   | water drop                     | calm: data & operations                    | `water`, `droplet`, `水滴`        |
+| `crown`  | three-pointed crown            | premium: VIP concierge, sales & leadership | `king`, `royal`, `皇冠`, `王冠`   |
 
 ```ts
-const face = createNpface(el, { shape: 'circle', state: 'idle' });
-face.setShape('hexagon'); // morphs
+const face = createNpface(el, { shape: 'cat', state: 'idle' });
+face.setShape('crown'); // morphs
 face.setShape('shield', { immediate: true }); // snaps
 ```
 
 ```tsx
-<Npface shape={employee.role === 'support' ? 'circle' : 'square'} state={status} />
+<Npface shape={employee.role === 'security' ? 'shield' : 'square'} state={status} />
 ```
 
-**Your own shape**: give an outline (rounded-polygon vertices `[x, y, cornerRadius]` listed clockwise, or an ellipse) and a visor slot in the 100×100 viewBox. Eye positions and size, the pivot and the zzz anchor are derived unless you set them (`eyes`, `eyeScale`, `pivot`, `zzz`).
+**Your own shape**: draw it in any vector tool inside a 100×100 box and paste the path data as `outline` (rounded-polygon vertices `[x, y, cornerRadius]` or an ellipse `{ cx, cy, rx, ry }` work too). Add the visor slot. Eye positions and size, the pivot and the zzz anchor are derived unless you set them (`eyes`, `eyeScale`, `pivot`, `zzz`); `dots` adds detached circles such as the circle's moon.
 
 ```ts
 import { registerShape } from 'npface';
 
-registerShape('pill', {
-  outline: { cx: 50, cy: 50, rx: 36, ry: 47 },
-  visor: { x: 18, y: 37, w: 64, h: 22 },
+registerShape('blob', {
+  outline: 'M50 6C80 6 94 30 94 55S76 94 50 94 6 80 6 55 20 6 50 6Z',
+  visor: { x: 14, y: 40, w: 72, h: 24 },
 });
-createNpface(el, { shape: 'pill' });
-// or inline, without registering: createNpface(el, { shape: { outline: [...], visor: {...} } })
+createNpface(el, { shape: 'blob' });
+// or inline, without registering: createNpface(el, { shape: { outline: '…', visor: {…} } })
 ```
 
 ### Customise
@@ -292,8 +293,8 @@ face.set('thinking'); // → idle → thinking → search-docs → search-web �
 ```
 
 - **13 个状态**：`sleep · wake · idle · blink · happy · proud(complete) · thinking · search-docs(文档检索) · search-web(联网检索) · working · waiting · error(晕) · sad(tired)`，支持别名（`searching`、`rag`、`browsing`、`tired` …，`searchDocs` / `search_docs` 也会被归一化），未知状态自动回落 `idle`，也可以注册自定义状态。
-- **6 种脸型**：npcrew 的 `square` 方形（默认），以及 `circle` 圆形、`triangle` 三角、`hexagon` 六边形、`shield` 盾形、`diamond` 菱形。所有表情在每种脸型上都能用，`setShape()` 平滑变形，也可以注册自定义脸型。
-- **零依赖**、框架无关的核心（直接操作 SVG/DOM，内置弹簧与缓动，全页面共用一个 `requestAnimationFrame` 循环），**gzip 约 12 KB**。
+- **7 种脸型**：npcrew 的 `square` 方形（默认），以及 `shield` 盾牌、`ghost` 幽灵、`cat` 猫咪、`circle` 圆形（带小卫星）、`drop` 水滴、`crown` 皇冠。所有表情在每种脸型上都能用，`setShape()` 平滑变形，也可以用 SVG 路径注册自定义脸型。
+- **零依赖**、框架无关的核心（直接操作 SVG/DOM，内置弹簧与缓动，全页面共用一个 `requestAnimationFrame` 循环），**gzip 约 14 KB**。
 - **React 封装**（`npface-react`）：`<Npface state="working" />`，Vue 可后续补充。
 - **默认就是活的**：呼吸、随机扫视、自动眨眼、每个状态自带节奏；可选**眼睛跟随鼠标**。
 - **体贴**：离屏自动暂停（IntersectionObserver），尊重 `prefers-reduced-motion`（只保留静态姿态与最小切换），`role="img"` + `aria-label`。
@@ -366,7 +367,7 @@ export function Employee({ status }: { status: string }) {
 | ------------------- | -------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `state` / `emotion` | `string`                         | `'idle'`   | 初始状态（支持别名，未知 → `idle`）                                                                                               |
 | `size`              | `number \| string`               | `48`       | 像素或 CSS 长度（`'100%'`、`'3rem'`）                                                                                             |
-| `shape`             | `string \| ShapeDef`             | `'square'` | 脸型：`square` · `circle` · `triangle` · `hexagon` · `shield` · `diamond`、已注册的名称或 `ShapeDef`（支持别名，未知 → `square`） |
+| `shape`             | `string \| ShapeDef`             | `'square'` | 脸型：`square` · `shield` · `ghost` · `cat` · `circle` · `drop` · `crown`、已注册的名称或 `ShapeDef`（支持别名，未知 → `square`） |
 | `colors`            | `{ body, visor, eye, rim, zzz }` | 品牌配色   | 任意子集；`rim` 为可选的头盔描边                                                                                                  |
 | `theme`             | `'light' \| 'dark' \| 'auto'`    | `'auto'`   | 选择默认配色（`auto` 跟随 `prefers-color-scheme`）                                                                                |
 | `follow` / `gaze`   | `boolean`                        | `false`    | 眼睛（带一点头部）跟随鼠标                                                                                                        |
@@ -418,42 +419,43 @@ export function Employee({ status }: { status: string }) {
 ### 脸型
 
 <p>
-  <img src="./assets/shapes.svg" alt="方形、圆形、三角、六边形、盾形、菱形" width="560" />
+  <img src="./assets/shapes.svg" alt="方形、盾牌、幽灵、猫咪、圆形、水滴、皇冠" width="640" />
   <img src="./assets/morph.svg" alt="npface 在各脸型之间变形" width="112" />
 </p>
 
-默认是 npcrew 的圆角方形头盔，另外内置五种脸型。所有表情在每种脸型上都能用：护目镜、眼睛位置与大小、头部转动支点、zzz 的位置都按脸型单独调过。切换时头盔会平滑变形（快速弹簧，带一点挤压拉伸）；开启减少动效时直接切换。
+默认是 npcrew 的圆角方形头盔，另外内置六种角色脸型。所有表情在每种脸型上都能用：护目镜、眼睛位置与大小、头部转动支点、zzz 的位置都按脸型单独调过。切换时头盔会平滑变形（快速弹簧，带一点挤压拉伸）；开启减少动效时直接切换。
 
-| 脸型             | 气质                           | 别名                        |
-| ---------------- | ------------------------------ | --------------------------- |
-| `square` 方形    | npcrew 头盔（默认）            | `default`、`helmet`、`方形` |
-| `circle` 圆形    | 圆润亲和：客服、陪伴类员工     | `round`、`圆形`             |
-| `triangle` 三角  | 饭团造型，眼睛靠下：创意类员工 | `tri`、`onigiri`、`三角`    |
-| `hexagon` 六边形 | 工程感十足：研发、运维类员工   | `hex`、`六边形`             |
-| `shield` 盾形    | 守护徽章：安全、合规类员工     | `badge`、`盾形`、`盾牌`     |
-| `diamond` 菱形   | 锐利精致：销售、VIP 管家类员工 | `rhombus`、`gem`、`菱形`    |
+| 脸型          | 造型             | 气质（建议）                     | 别名                              |
+| ------------- | ---------------- | -------------------------------- | --------------------------------- |
+| `square` 方形 | 圆角方形（默认） | npcrew 头盔                      | `default`、`helmet`、`方形`       |
+| `shield` 盾牌 | 带尖顶的盾牌     | 守护：安全、合规类员工           | `badge`、`盾牌`、`盾形`           |
+| `ghost` 幽灵  | 圆顶、波浪下摆   | 俏皮：创意、内容类员工           | `boo`、`幽灵`                     |
+| `cat` 猫咪    | 圆耳朵、饱满脸颊 | 亲切：社群运营、客服类员工       | `kitty`、`neko`、`猫咪`、`猫`     |
+| `circle` 圆形 | 圆脸带一颗小卫星 | 友好：陪伴、助理类员工           | `round`、`planet`、`圆形`、`星球` |
+| `drop` 水滴   | 水滴             | 清爽：数据、运营类员工           | `water`、`droplet`、`水滴`        |
+| `crown` 皇冠  | 三尖皇冠         | 尊贵：VIP 管家、销售、管理类员工 | `king`、`royal`、`皇冠`、`王冠`   |
 
 ```ts
-const face = createNpface(el, { shape: 'circle', state: 'idle' });
-face.setShape('hexagon'); // 平滑变形
+const face = createNpface(el, { shape: 'cat', state: 'idle' });
+face.setShape('crown'); // 平滑变形
 face.setShape('shield', { immediate: true }); // 直接切换
 ```
 
 ```tsx
-<Npface shape={employee.role === 'support' ? 'circle' : 'square'} state={status} />
+<Npface shape={employee.role === 'security' ? 'shield' : 'square'} state={status} />
 ```
 
-**自定义脸型**：在 100×100 的坐标系里给出轮廓（圆角多边形顶点 `[x, y, 圆角半径]`，按顺时针排列；或一个椭圆）和护目镜槽。眼睛位置与大小、转动支点、zzz 位置会自动推算，也可以用 `eyes`、`eyeScale`、`pivot`、`zzz` 手动指定。
+**自定义脸型**：在任意矢量工具里按 100×100 的画布画好轮廓，把路径数据粘贴到 `outline`（也可以用圆角多边形顶点 `[x, y, 圆角半径]` 或椭圆 `{ cx, cy, rx, ry }`），再给出护目镜槽。眼睛位置与大小、转动支点、zzz 位置会自动推算，也可以用 `eyes`、`eyeScale`、`pivot`、`zzz` 手动指定；`dots` 可以加上独立的小圆点（比如圆形脸型的小卫星）。
 
 ```ts
 import { registerShape } from 'npface';
 
-registerShape('pill', {
-  outline: { cx: 50, cy: 50, rx: 36, ry: 47 },
-  visor: { x: 18, y: 37, w: 64, h: 22 },
+registerShape('blob', {
+  outline: 'M50 6C80 6 94 30 94 55S76 94 50 94 6 80 6 55 20 6 50 6Z',
+  visor: { x: 14, y: 40, w: 72, h: 24 },
 });
-createNpface(el, { shape: 'pill' });
-// 也可以不注册、直接内联：createNpface(el, { shape: { outline: [...], visor: {...} } })
+createNpface(el, { shape: 'blob' });
+// 也可以不注册、直接内联：createNpface(el, { shape: { outline: '…', visor: {…} } })
 ```
 
 ### 自定义

@@ -37,8 +37,8 @@ export interface NpfaceProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'onCh
   /** CSS px (number) or any CSS length (string). Default 48. */
   size?: number | string;
   /**
-   * Face shape: `'square'` (default), `'circle'`, `'triangle'`, `'hexagon'`, `'shield'`,
-   * `'diamond'`, a registered name or a `ShapeDef`. Changing it morphs the helmet.
+   * Face shape: `'square'` (default), `'shield'`, `'ghost'`, `'cat'`, `'circle'`, `'drop'`,
+   * `'crown'`, a registered name or a `ShapeDef`. Changing it morphs the helmet.
    */
   shape?: string | ShapeDef;
   colors?: Partial<NpfaceColors>;

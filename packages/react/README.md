@@ -9,7 +9,7 @@ import { Npface, type NpfaceHandle } from 'npface-react';
 export function Employee({ status }: { status: string }) {
   const face = useRef<NpfaceHandle>(null);
   return (
-    <Npface ref={face} state={status} shape="circle" size={48} follow onStateChange={console.log} />
+    <Npface ref={face} state={status} shape="cat" size={48} follow onStateChange={console.log} />
   );
   // face.current?.pulse('proud')
 }

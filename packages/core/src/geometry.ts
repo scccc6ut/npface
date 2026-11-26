@@ -135,6 +135,219 @@ export function roundedPolygonPoints(verts: [number, number, number][]): number[
   return out;
 }
 
+/* ---------------- SVG path outlines ---------------- */
+
+const NUM_RE = /[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/y;
+
+/** Append points of an SVG elliptical arc (endpoint parametrisation, SVG spec F.6.5). */
+function arcPoints(
+  out: number[],
+  x1: number,
+  y1: number,
+  rx: number,
+  ry: number,
+  rotDeg: number,
+  large: boolean,
+  sweep: boolean,
+  x2: number,
+  y2: number,
+): void {
+  if (!rx || !ry || (x1 === x2 && y1 === y2)) {
+    out.push(x2, y2);
+    return;
+  }
+  rx = Math.abs(rx);
+  ry = Math.abs(ry);
+  const phi = (rotDeg * Math.PI) / 180;
+  const cos = Math.cos(phi),
+    sin = Math.sin(phi);
+  const dx = (x1 - x2) / 2,
+    dy = (y1 - y2) / 2;
+  const xp = cos * dx + sin * dy,
+    yp = -sin * dx + cos * dy;
+  const lam = (xp * xp) / (rx * rx) + (yp * yp) / (ry * ry);
+  if (lam > 1) {
+    rx *= Math.sqrt(lam);
+    ry *= Math.sqrt(lam);
+  }
+  const num = rx * rx * ry * ry - rx * rx * yp * yp - ry * ry * xp * xp;
+  const den = rx * rx * yp * yp + ry * ry * xp * xp;
+  let co = Math.sqrt(Math.max(0, num / den));
+  if (large === sweep) co = -co;
+  const cxp = (co * rx * yp) / ry,
+    cyp = (-co * ry * xp) / rx;
+  const cx = cos * cxp - sin * cyp + (x1 + x2) / 2,
+    cy = sin * cxp + cos * cyp + (y1 + y2) / 2;
+  const ux = (xp - cxp) / rx,
+    uy = (yp - cyp) / ry,
+    vx = (-xp - cxp) / rx,
+    vy = (-yp - cyp) / ry;
+  const t1 = Math.atan2(uy, ux);
+  let dt = Math.atan2(ux * vy - uy * vx, ux * vx + uy * vy);
+  if (!sweep && dt > 0) dt -= 2 * Math.PI;
+  else if (sweep && dt < 0) dt += 2 * Math.PI;
+  const steps = Math.max(2, Math.ceil((Math.abs(dt) * Math.max(rx, ry)) / 0.6));
+  for (let k = 1; k <= steps; k++) {
+    const t = t1 + (dt * k) / steps;
+    const ex = rx * Math.cos(t),
+      ey = ry * Math.sin(t);
+    out.push(cos * ex - sin * ey + cx, sin * ex + cos * ey + cy);
+  }
+}
+
+/**
+ * Dense points along the first subpath of SVG path data (M L H V C S Q T A Z, absolute and
+ * relative), so outlines can be drawn in any vector tool. No DOM needed.
+ */
+export function pathPoints(d: string): number[] {
+  const out: number[] = [];
+  const n = d.length;
+  let i = 0;
+  const skip = () => {
+    while (i < n && ' ,\n\r\t'.includes(d[i]!)) i++;
+  };
+  const num = (): number => {
+    skip();
+    NUM_RE.lastIndex = i;
+    const m = NUM_RE.exec(d);
+    if (!m) throw new Error(`npface: invalid path data at ${i}`);
+    i = NUM_RE.lastIndex;
+    return +m[0];
+  };
+  const flag = (): boolean => {
+    skip();
+    const c = d[i++];
+    if (c !== '0' && c !== '1') throw new Error(`npface: invalid arc flag at ${i - 1}`);
+    return c === '1';
+  };
+  let x = 0,
+    y = 0,
+    qx = 0,
+    qy = 0; // current point, last control point (for S / T)
+  let cmd = '';
+  let last = '';
+  const cubic = (x1: number, y1: number, x2: number, y2: number, px: number, py: number) => {
+    const len =
+      Math.hypot(x1 - x, y1 - y) + Math.hypot(x2 - x1, y2 - y1) + Math.hypot(px - x2, py - y2);
+    const steps = Math.max(4, Math.ceil(len / 0.6));
+    for (let k = 1; k <= steps; k++) {
+      const t = k / steps,
+        u = 1 - t;
+      out.push(
+        u * u * u * x + 3 * u * u * t * x1 + 3 * u * t * t * x2 + t * t * t * px,
+        u * u * u * y + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * py,
+      );
+    }
+    x = px;
+    y = py;
+  };
+  const quad = (x1: number, y1: number, px: number, py: number) =>
+    cubic(
+      x + (2 / 3) * (x1 - x),
+      y + (2 / 3) * (y1 - y),
+      px + (2 / 3) * (x1 - px),
+      py + (2 / 3) * (y1 - py),
+      px,
+      py,
+    );
+  for (;;) {
+    skip();
+    if (i >= n) break;
+    if (/[MLHVCSQTAZ]/i.test(d[i]!)) cmd = d[i++]!;
+    else if (!cmd || /z/i.test(cmd)) throw new Error(`npface: invalid path data at ${i}`);
+    // otherwise: implicit repetition of the previous command
+    const rel = cmd >= 'a';
+    const ox = rel ? x : 0,
+      oy = rel ? y : 0;
+    switch (cmd.toUpperCase()) {
+      case 'M': {
+        if (out.length) return out; // the first subpath is the outline
+        x = num() + ox;
+        y = num() + oy;
+        out.push(x, y);
+        cmd = rel ? 'l' : 'L';
+        break;
+      }
+      case 'L':
+        x = num() + ox;
+        y = num() + oy;
+        out.push(x, y);
+        break;
+      case 'H':
+        x = num() + ox;
+        out.push(x, y);
+        break;
+      case 'V':
+        y = num() + oy;
+        out.push(x, y);
+        break;
+      case 'C': {
+        const x1 = num() + ox,
+          y1 = num() + oy,
+          x2 = num() + ox,
+          y2 = num() + oy;
+        const px = num() + ox,
+          py = num() + oy;
+        qx = x2;
+        qy = y2;
+        cubic(x1, y1, x2, y2, px, py);
+        break;
+      }
+      case 'S': {
+        const refl = /[CS]/i.test(last);
+        const x1 = refl ? 2 * x - qx : x,
+          y1 = refl ? 2 * y - qy : y;
+        const x2 = num() + ox,
+          y2 = num() + oy,
+          px = num() + ox,
+          py = num() + oy;
+        qx = x2;
+        qy = y2;
+        cubic(x1, y1, x2, y2, px, py);
+        break;
+      }
+      case 'Q': {
+        const x1 = num() + ox,
+          y1 = num() + oy,
+          px = num() + ox,
+          py = num() + oy;
+        qx = x1;
+        qy = y1;
+        quad(x1, y1, px, py);
+        break;
+      }
+      case 'T': {
+        const refl = /[QT]/i.test(last);
+        const x1 = refl ? 2 * x - qx : x,
+          y1 = refl ? 2 * y - qy : y;
+        const px = num() + ox,
+          py = num() + oy;
+        qx = x1;
+        qy = y1;
+        quad(x1, y1, px, py);
+        break;
+      }
+      case 'A': {
+        const rx = num(),
+          ry = num(),
+          rot = num(),
+          large = flag(),
+          sweep = flag();
+        const px = num() + ox,
+          py = num() + oy;
+        arcPoints(out, x, y, rx, ry, rot, large, sweep, px, py);
+        x = px;
+        y = py;
+        break;
+      }
+      default: // Z — the outline is closed implicitly
+        return out;
+    }
+    last = cmd;
+  }
+  return out;
+}
+
 /** Dense points along an ellipse, clockwise on screen from the top. */
 export function ellipsePoints(cx: number, cy: number, rx: number, ry: number): number[] {
   const out: number[] = [];

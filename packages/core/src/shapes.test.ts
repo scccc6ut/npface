@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SHAPES, SHAPE_NAMES, registerShape, resolveShape, resolveShapeName } from './shapes';
-import { OUTLINE_POINTS } from './geometry';
+import { OUTLINE_POINTS, pathPoints } from './geometry';
 import { createNpface } from './npface';
 import type { Npface } from './types';
 
@@ -34,7 +34,7 @@ const selfIntersects = (poly: P[]): boolean => {
   }
   return false;
 };
-/** Sample points on the boundary of a stadium (the visor). */
+/** Points on the boundary of a stadium (the visor). */
 const stadium = ([x, y, w, h]: number[]): P[] => {
   const r = h! / 2;
   const out: P[] = [];
@@ -47,8 +47,8 @@ const stadium = ([x, y, w, h]: number[]): P[] => {
 };
 
 describe('face shapes: data', () => {
-  it('ships six built-in shapes, square first', () => {
-    expect(SHAPE_NAMES).toEqual(['square', 'circle', 'triangle', 'hexagon', 'shield', 'diamond']);
+  it('ships seven built-in shapes, square first', () => {
+    expect(SHAPE_NAMES).toEqual(['square', 'shield', 'ghost', 'cat', 'circle', 'drop', 'crown']);
     for (const n of SHAPE_NAMES) expect(SHAPES[n], n).toBeDefined();
   });
 
@@ -58,16 +58,17 @@ describe('face shapes: data', () => {
       const s = resolveShape(name);
       expect(s.pts.length).toBe(OUTLINE_POINTS * 2);
       const pts = pointsOf(s.pts);
-      // starts at the top centre
+      // starts on the vertical centre line at its topmost crossing (between the ears for the cat)
       expect(pts[0]![0]).toBeCloseTo(50, 5);
-      expect(pts[0]![1]).toBeCloseTo(Math.min(...pts.map((p) => p[1])), 1);
-      // clockwise: second point is to the right of the first
+      for (const [x, y] of pts)
+        if (Math.abs(x - 50) < 0.5) expect(y).toBeGreaterThan(pts[0]![1] - 0.01);
+      // clockwise: the second point is to the right of the first
       expect(pts[1]![0]).toBeGreaterThan(pts[0]![0]);
       // mirror symmetric about x = 50: point k ↔ point n - k
       const n = pts.length;
       for (let k = 1; k < n; k++) {
-        expect(pts[k]![0] - 50).toBeCloseTo(-(pts[n - k]![0] - 50), 3);
-        expect(pts[k]![1]).toBeCloseTo(pts[n - k]![1], 3);
+        expect(pts[k]![0] - 50).toBeCloseTo(-(pts[n - k]![0] - 50), 2);
+        expect(pts[k]![1]).toBeCloseTo(pts[n - k]![1], 2);
       }
       for (const [x, y] of pts) {
         expect(x).toBeGreaterThan(0);
@@ -79,24 +80,33 @@ describe('face shapes: data', () => {
     },
   );
 
-  it.each(SHAPE_NAMES)('%s: visor sits inside the helmet and the eyes inside the visor', (name) => {
-    const s = resolveShape(name);
-    const poly = pointsOf(s.pts);
-    for (const [x, y] of stadium(s.visor)) expect(inside(poly, x, y), `${x},${y}`).toBe(true);
-    const [vx, vy, vw, vh] = s.visor;
-    const [lx, ly, rx, ry] = s.eyes;
-    for (const [x, y] of [
-      [lx, ly],
-      [rx, ry],
-    ] as P[]) {
-      expect(x).toBeGreaterThan(vx);
-      expect(x).toBeLessThan(vx + vw);
-      expect(y).toBeGreaterThan(vy);
-      expect(y).toBeLessThan(vy + vh);
-    }
-    expect(s.eyeScale).toBeGreaterThan(0.7);
-    expect(s.eyeScale).toBeLessThanOrEqual(1);
-  });
+  it.each(SHAPE_NAMES)(
+    '%s: visor inside the helmet, eyes inside the visor, dots outside',
+    (name) => {
+      const s = resolveShape(name);
+      const poly = pointsOf(s.pts);
+      for (const [x, y] of stadium(s.visor)) expect(inside(poly, x, y), `${x},${y}`).toBe(true);
+      const [vx, vy, vw, vh] = s.visor;
+      const [lx, ly, rx, ry] = s.eyes;
+      for (const [x, y] of [
+        [lx, ly],
+        [rx, ry],
+      ] as P[]) {
+        expect(x).toBeGreaterThan(vx);
+        expect(x).toBeLessThan(vx + vw);
+        expect(y).toBeGreaterThan(vy);
+        expect(y).toBeLessThan(vy + vh);
+      }
+      expect(s.eyeScale).toBeGreaterThan(0.7);
+      expect(s.eyeScale).toBeLessThanOrEqual(1.1);
+      for (let k = 0; k < s.dots.length; k += 3) {
+        const [cx, cy, r] = [s.dots[k]!, s.dots[k + 1]!, s.dots[k + 2]!];
+        expect(cx + r).toBeLessThanOrEqual(100);
+        expect(cy - r).toBeGreaterThanOrEqual(0);
+        expect(inside(poly, cx, cy)).toBe(false);
+      }
+    },
+  );
 
   it('every pair of shapes morphs without the outline crossing itself', () => {
     for (const a of SHAPE_NAMES) {
@@ -116,16 +126,59 @@ describe('face shapes: data', () => {
   it('resolves names, aliases (incl. Chinese) and unknowns', () => {
     expect(resolveShapeName('circle')).toBe('circle');
     expect(resolveShapeName('Circle')).toBe('circle');
-    expect(resolveShapeName('round')).toBe('circle');
+    expect(resolveShapeName('planet')).toBe('circle');
     expect(resolveShapeName('圆形')).toBe('circle');
-    expect(resolveShapeName('三角')).toBe('triangle');
-    expect(resolveShapeName('hex')).toBe('hexagon');
+    expect(resolveShapeName('猫咪')).toBe('cat');
+    expect(resolveShapeName('kitty')).toBe('cat');
     expect(resolveShapeName('盾牌')).toBe('shield');
-    expect(resolveShapeName('rhombus')).toBe('diamond');
-    expect(resolveShapeName('blob')).toBe('square');
+    expect(resolveShapeName('幽灵')).toBe('ghost');
+    expect(resolveShapeName('水滴')).toBe('drop');
+    expect(resolveShapeName('皇冠')).toBe('crown');
+    expect(resolveShapeName('triangle')).toBe('square'); // not built in
     expect(resolveShapeName('')).toBe('square');
     expect(resolveShape(undefined).name).toBe('square');
     expect(resolveShape('circle')).toBe(resolveShape('round')); // cached
+  });
+
+  it('parses SVG path data: relative commands, H/V, S/T reflection, compact arc flags', () => {
+    const at = (d: string) => pointsOf(pathPoints(d));
+    expect(at('M10 10h20v20H10z')).toEqual([
+      [10, 10],
+      [30, 10],
+      [30, 30],
+      [10, 30],
+    ]);
+    // implicit lineto after moveto, relative
+    expect(at('m5 5 10 0 0 10z')).toEqual([
+      [5, 5],
+      [15, 5],
+      [15, 15],
+    ]);
+    // compact arc flags ("01"): a relative half circle that ends where it should and bulges up
+    const arc = at('M0 0a10 10 0 01 20 0');
+    expect(arc[arc.length - 1]![0]).toBeCloseTo(20, 5);
+    expect(arc[arc.length - 1]![1]).toBeCloseTo(0, 5);
+    expect(Math.min(...arc.map((p) => p[1]))).toBeCloseTo(-10, 1);
+    // smooth curves reflect the previous control point
+    const sc = at('M0 0C0 10 10 10 10 0S20 -10 20 0');
+    expect(sc[sc.length - 1]).toEqual([20, 0]);
+    expect(Math.min(...sc.map((p) => p[1]))).toBeLessThan(-5);
+    expect(Math.min(...at('M0 0Q5 10 10 0T20 0').map((p) => p[1]))).toBeLessThan(-4);
+    // only the first subpath is the outline
+    expect(at('M0 0L10 0L10 10ZM50 50L60 50Z').length).toBe(3);
+    expect(() => pathPoints('M0 0 L x')).toThrow(/invalid path data/);
+  });
+
+  it('accepts SVG path outlines for custom shapes', () => {
+    registerShape('blob', {
+      outline: 'M50 6C80 6 94 30 94 55S76 94 50 94 6 80 6 55 20 6 50 6Z',
+      visor: { x: 14, y: 40, w: 72, h: 24 },
+    });
+    const s = resolveShape('blob');
+    expect(s.name).toBe('blob');
+    expect(s.path.startsWith('M50 6')).toBe(true);
+    expect(s.pts.length).toBe(OUTLINE_POINTS * 2);
+    expect(selfIntersects(pointsOf(s.pts))).toBe(false);
   });
 
   it('registers custom shapes and fills in defaults', () => {
@@ -138,7 +191,7 @@ describe('face shapes: data', () => {
     expect(s.eyeScale).toBeCloseTo(22 / 24, 5);
     expect(s.eyes[1]).toBeCloseTo(48, 5);
     expect(s.pivot[1]).toBeCloseTo(97 - 12, 1);
-    expect(s.path.startsWith('M')).toBe(true);
+    expect(s.dots).toEqual([]);
     // re-registering replaces the cached geometry
     registerShape('pill', {
       outline: { cx: 50, cy: 50, rx: 30, ry: 47 },
@@ -159,6 +212,8 @@ const make = (opts?: Parameters<typeof createNpface>[1]) => {
 };
 const body = (f: Npface) => f.el.querySelector('.npface-body')!.getAttribute('d');
 const visorAttr = (f: Npface, a: string) => +f.el.querySelector('.npface-visor')!.getAttribute(a)!;
+const shownDots = (f: Npface) =>
+  [...f.el.querySelectorAll('.npface-dot')].filter((d) => d.getAttribute('display') !== 'none');
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -182,37 +237,37 @@ describe('face shapes: instance', () => {
     expect(a.shape).toBe('square');
     expect(a.el.getAttribute('data-shape')).toBe('square');
     expect(body(a)).toBe(resolveShape('square').path);
-    const b = make({ shape: 'hexagon' });
-    expect(b.shape).toBe('hexagon');
-    expect(body(b)).toBe(resolveShape('hexagon').path);
-    expect(visorAttr(b, 'width')).toBe(74);
+    const b = make({ shape: 'ghost' });
+    expect(b.shape).toBe('ghost');
+    expect(body(b)).toBe(resolveShape('ghost').path);
+    expect(visorAttr(b, 'width')).toBeCloseTo(73.2, 2);
   });
 
   it('setShape morphs through intermediate outlines and lands on the exact target', () => {
     const f = make({ shape: 'square' });
     vi.advanceTimersByTime(100);
-    f.setShape('triangle');
-    expect(f.shape).toBe('triangle');
-    expect(f.el.getAttribute('data-shape')).toBe('triangle');
+    f.setShape('drop');
+    expect(f.shape).toBe('drop');
+    expect(f.el.getAttribute('data-shape')).toBe('drop');
     vi.advanceTimersByTime(120);
     const mid = body(f)!;
     expect(mid).not.toBe(resolveShape('square').path);
-    expect(mid).not.toBe(resolveShape('triangle').path);
+    expect(mid).not.toBe(resolveShape('drop').path);
     expect(mid.match(/L/g)!.length).toBe(OUTLINE_POINTS - 1); // morphing polyline
     expect(visorAttr(f, 'y')).toBeGreaterThan(36);
-    expect(visorAttr(f, 'y')).toBeLessThan(59);
+    expect(visorAttr(f, 'y')).toBeLessThan(52.5);
     vi.advanceTimersByTime(1500);
-    expect(body(f)).toBe(resolveShape('triangle').path);
-    expect(visorAttr(f, 'y')).toBe(58);
+    expect(body(f)).toBe(resolveShape('drop').path);
+    expect(visorAttr(f, 'y')).toBeCloseTo(51.7, 2);
   });
 
   it('immediate and reduced motion snap; same shape is a no-op', () => {
     const f = make({ shape: 'circle' });
-    f.setShape('diamond', { immediate: true });
+    f.setShape('crown', { immediate: true });
     vi.advanceTimersByTime(20);
-    expect(body(f)).toBe(resolveShape('diamond').path);
+    expect(body(f)).toBe(resolveShape('crown').path);
     const before = body(f);
-    f.setShape('rhombus'); // alias of the current shape
+    f.setShape('皇冠'); // alias of the current shape
     vi.advanceTimersByTime(20);
     expect(body(f)).toBe(before);
 
@@ -240,8 +295,26 @@ describe('face shapes: instance', () => {
     expect(body(f)).toBe(resolveShape(def).path);
   });
 
-  it('eyes follow the shape layout (triangle eyes sit low and smaller)', () => {
-    const f = make({ shape: 'triangle', state: 'idle', reducedMotion: true });
+  it('the moon dot grows in and shrinks out with the circle shape', () => {
+    const f = make({ shape: 'square' });
+    expect(shownDots(f).length).toBe(0);
+    f.setShape('circle');
+    vi.advanceTimersByTime(100);
+    const r = +shownDots(f)[0]!.getAttribute('r')!;
+    expect(r).toBeGreaterThan(0);
+    expect(r).toBeLessThan(7);
+    vi.advanceTimersByTime(1500);
+    expect(+shownDots(f)[0]!.getAttribute('r')!).toBe(7);
+    expect(shownDots(f)[0]!.getAttribute('fill')).toBe('#0f1d3a');
+    f.setColors({ body: '#123456' });
+    expect(shownDots(f)[0]!.getAttribute('fill')).toBe('#123456');
+    f.setShape('ghost');
+    vi.advanceTimersByTime(1500);
+    expect(shownDots(f).length).toBe(0);
+  });
+
+  it('eyes follow the shape layout (drop eyes sit low and smaller)', () => {
+    const f = make({ shape: 'drop', state: 'idle', reducedMotion: true });
     vi.advanceTimersByTime(50);
     const d = f.el.querySelector('.npface-eye-l')!.getAttribute('d')!;
     const ys = d
@@ -249,9 +322,8 @@ describe('face shapes: instance', () => {
       .split(/[ML]/)
       .filter(Boolean)
       .map((p) => +p.split(' ')[1]!);
-    const s = resolveShape('triangle');
-    const h = Math.max(...ys) - Math.min(...ys);
+    const s = resolveShape('drop');
     expect((Math.max(...ys) + Math.min(...ys)) / 2).toBeCloseTo(s.eyes[1], 0);
-    expect(h).toBeCloseTo(14.5 * s.eyeScale, 0);
+    expect(Math.max(...ys) - Math.min(...ys)).toBeCloseTo(14.5 * s.eyeScale, 0);
   });
 });

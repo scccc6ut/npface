@@ -37,6 +37,7 @@ export {
   ellipsePath,
   resampleOutline,
   pointsPath,
+  pathPoints,
 } from './geometry';
 export { MotionLayer } from './motion';
 export type {

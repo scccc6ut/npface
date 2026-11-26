@@ -29,42 +29,40 @@ export function Shapes({
 
   return (
     <Section id="shapes" title={`${t.shapes} · ${SHAPE_META.length}`} body={t.shapesBody}>
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-        <div className="card stage-grid flex flex-col items-center justify-center gap-3 rounded-3xl p-6">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="card stage-grid flex flex-col items-center justify-center gap-2 rounded-2xl px-3 pt-5 pb-4 text-center">
           <Npface
             shape={morph.name}
             state={morphState}
-            size={168}
+            size={96}
             follow
             theme={theme}
             label={`npface ${morph.name}`}
           />
-          <div className="font-mono text-sm">
+          <div className="mt-1 font-mono text-sm">
             shape:{' '}
             <span className="font-semibold text-lime-deep dark:text-lime">'{morph.name}'</span>
           </div>
-          <div className="text-xs opacity-60">{t.morphHint}</div>
+          <div className="text-[11px] leading-snug opacity-60">{t.morphHint}</div>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {SHAPE_META.map((m) => (
-            <button
-              key={m.name}
-              type="button"
-              onClick={() => onPick(m.name)}
-              aria-label={`${m.name} — ${lang === 'en' ? m.descEn : m.descZh}`}
-              className={`card flex flex-col items-center gap-1.5 px-3 pt-5 pb-4 text-center transition hover:-translate-y-0.5 hover:shadow-md ${current === m.name ? 'ring-2 ring-navy dark:ring-lime' : ''}`}
-            >
-              <Npface shape={m.name} size={72} follow theme={theme} label={m.name} />
-              <div className="mt-1 font-mono text-sm font-semibold">{m.name}</div>
-              <div className="text-xs font-medium text-navy/70 dark:text-sand/70">
-                {lang === 'en' ? m.zh : m.en}
-              </div>
-              <div className="text-[11px] leading-snug text-navy/60 dark:text-sand/60">
-                {lang === 'en' ? m.descEn : m.descZh}
-              </div>
-            </button>
-          ))}
-        </div>
+        {SHAPE_META.map((m) => (
+          <button
+            key={m.name}
+            type="button"
+            onClick={() => onPick(m.name)}
+            aria-label={`${m.name} — ${lang === 'en' ? m.descEn : m.descZh}`}
+            className={`card flex flex-col items-center gap-1.5 px-3 pt-5 pb-4 text-center transition hover:-translate-y-0.5 hover:shadow-md ${current === m.name ? 'ring-2 ring-navy dark:ring-lime' : ''}`}
+          >
+            <Npface shape={m.name} size={72} follow theme={theme} label={m.name} />
+            <div className="mt-1 font-mono text-sm font-semibold">{m.name}</div>
+            <div className="text-xs font-medium text-navy/70 dark:text-sand/70">
+              {lang === 'en' ? m.zh : m.en}
+            </div>
+            <div className="text-[11px] leading-snug text-navy/60 dark:text-sand/60">
+              {lang === 'en' ? m.descEn : m.descZh}
+            </div>
+          </button>
+        ))}
       </div>
     </Section>
   );

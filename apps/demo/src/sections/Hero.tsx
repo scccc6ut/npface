@@ -25,7 +25,7 @@ export function Hero({ t, lang }: { t: UIStrings; lang: Lang }) {
         <div className="flex flex-wrap gap-2">
           <span className="chip">MIT</span>
           <span className="chip">0 deps</span>
-          <span className="chip">~12 KB gz</span>
+          <span className="chip">~14 KB gz</span>
           <span className="chip">React · Vanilla</span>
           <span className="chip">prefers-reduced-motion</span>
         </div>

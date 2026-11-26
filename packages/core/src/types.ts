@@ -189,10 +189,13 @@ export type Theme = 'light' | 'dark' | 'auto';
  */
 export interface ShapeDef {
   /**
-   * Helmet outline: rounded-polygon vertices `[x, y, cornerRadius]` listed clockwise,
-   * or an ellipse `{ cx, cy, rx, ry }`.
+   * Helmet outline: SVG path data (one closed subpath, drawn in any vector tool),
+   * rounded-polygon vertices `[x, y, cornerRadius]` listed clockwise, or an ellipse
+   * `{ cx, cy, rx, ry }`.
    */
-  outline: [number, number, number][] | { cx: number; cy: number; rx: number; ry: number };
+  outline: string | [number, number, number][] | { cx: number; cy: number; rx: number; ry: number };
+  /** Detached circles `[cx, cy, r]` in the helmet colour (e.g. a little moon). They move with the head. */
+  dots?: [number, number, number][];
   /** Visor slot (a stadium). The eyes are clipped by it. */
   visor: { x: number; y: number; w: number; h: number };
   /** Eye centres `[left, right]`. Default: placed inside the visor like the square. */
@@ -226,8 +229,9 @@ export interface NpfaceOptions {
   /** Rendered size — a number of CSS px or any CSS length string. Default 48. */
   size?: number | string;
   /**
-   * Face shape: `'square'` (default, the npcrew helmet), `'circle'`, `'triangle'`, `'hexagon'`,
-   * `'shield'`, `'diamond'`, a name passed to `registerShape()`, or a `ShapeDef`.
+   * Face shape: `'square'` (default, the npcrew helmet), `'shield'`, `'ghost'`, `'cat'`,
+   * `'circle'` (with a little moon), `'drop'`, `'crown'`, a name passed to `registerShape()`,
+   * or a `ShapeDef`.
    * Unknown names fall back to `'square'`.
    */
   shape?: string | ShapeDef;

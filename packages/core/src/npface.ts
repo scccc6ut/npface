@@ -99,6 +99,7 @@ type HeadSprings = Record<HeadProp, Spring>;
 /** Face-shape values the renderer reads every frame (interpolated while morphing). */
 interface Layout {
   pts: Float64Array;
+  dots: number[];
   visor: number[];
   eyes: number[];
   eyeScale: number;
@@ -108,6 +109,7 @@ interface Layout {
 
 const layoutOf = (sh: ResolvedShape): Layout => ({
   pts: Float64Array.from(sh.pts),
+  dots: [...sh.dots],
   visor: [...sh.visor],
   eyes: [...sh.eyes],
   eyeScale: sh.eyeScale,
@@ -127,6 +129,26 @@ function lerpInto(
 /** `out = a + (b - a) · t` for every layout value; `lerpLayout(out, out, b, 1)` copies `b`. */
 function lerpLayout(out: Layout, a: Layout, b: ResolvedShape, t: number): void {
   lerpInto(out.pts, a.pts, b.pts, t);
+  // dots that exist on one side only grow / shrink in place
+  const ad = a.dots,
+    bd = b.dots;
+  const na = ad.length / 3,
+    nb = bd.length / 3,
+    n = Math.max(na, nb);
+  const od = out.dots.length === n * 3 ? out.dots : new Array<number>(n * 3).fill(0);
+  for (let k = 0; k < n; k++) {
+    const j = 3 * k;
+    const ax = k < na ? ad[j]! : bd[j]!,
+      ay = k < na ? ad[j + 1]! : bd[j + 1]!,
+      ar = k < na ? ad[j + 2]! : 0;
+    const bx = k < nb ? bd[j]! : ad[j]!,
+      by = k < nb ? bd[j + 1]! : ad[j + 1]!,
+      br = k < nb ? bd[j + 2]! : 0;
+    od[j] = ax + (bx - ax) * t;
+    od[j + 1] = ay + (by - ay) * t;
+    od[j + 2] = Math.max(0, ar + (br - ar) * t);
+  }
+  out.dots = t >= 1 && n > nb ? od.slice(0, nb * 3) : od;
   lerpInto(out.visor, a.visor, b.visor, t);
   lerpInto(out.eyes, a.eyes, b.eyes, t);
   out.eyeScale = a.eyeScale + (b.eyeScale - a.eyeScale) * t;
@@ -137,7 +159,8 @@ function lerpLayout(out: Layout, a: Layout, b: ResolvedShape, t: number): void {
 const sameShape = (a: ResolvedShape, b: ResolvedShape): boolean =>
   a.path === b.path &&
   a.eyeScale === b.eyeScale &&
-  String([a.visor, a.eyes, a.pivot, a.zzz]) === String([b.visor, b.eyes, b.pivot, b.zzz]);
+  String([a.dots, a.visor, a.eyes, a.pivot, a.zzz]) ===
+    String([b.dots, b.visor, b.eyes, b.pivot, b.zzz]);
 
 /** Shape morph: quick, with a hint of overshoot so the helmet feels a little like jelly. */
 const SPRING_MORPH: SpringConfig = { stiffness: 200, damping: 21 };
@@ -222,6 +245,8 @@ export class NpfaceInstance implements Npface {
   private readonly body: SVGPathElement;
   private readonly visor: SVGRectElement;
   private readonly visorClip: SVGRectElement;
+  private readonly dotsG: SVGGElement;
+  private readonly dotEls: SVGCircleElement[] = [];
   private readonly eyeL: SVGPathElement;
   private readonly eyeR: SVGPathElement;
   private readonly crossL: SVGPathElement;
@@ -320,6 +345,7 @@ export class NpfaceInstance implements Npface {
     const root = svg('g', { class: 'npface-head' });
     this.root = root;
     this.body = svg('path', { class: 'npface-body' });
+    this.dotsG = svg('g', { class: 'npface-dots' });
     this.visor = svg('rect', { class: 'npface-visor' });
     // eyes are clipped by the visor slot
     const clipId = 'npface-clip-' + (++uid).toString(36);
@@ -340,7 +366,7 @@ export class NpfaceInstance implements Npface {
     this.crossL = svg('path', crossAttrs);
     this.crossR = svg('path', crossAttrs);
     eyes.append(this.eyeL, this.eyeR, this.crossL, this.crossR);
-    root.append(this.body, this.visor, eyes);
+    root.append(this.body, this.dotsG, this.visor, eyes);
     el.append(defs, root);
     container.appendChild(el);
     this.renderShape();
@@ -455,6 +481,7 @@ export class NpfaceInstance implements Npface {
       // morph from whatever is on screen now (possibly mid-morph) to the new shape
       this.morphFrom = {
         pts: Float64Array.from(this.lay.pts),
+        dots: [...this.lay.dots],
         visor: [...this.lay.visor],
         eyes: [...this.lay.eyes],
         eyeScale: this.lay.eyeScale,
@@ -698,13 +725,15 @@ export class NpfaceInstance implements Npface {
 
   private applyColors(): void {
     const c = this.palette();
-    this.body.setAttribute('fill', c.body);
-    if (c.rim && c.rim !== 'none') {
-      this.body.setAttribute('stroke', c.rim);
-      this.body.setAttribute('stroke-width', '1.5');
-    } else {
-      this.body.removeAttribute('stroke');
-      this.body.removeAttribute('stroke-width');
+    for (const part of [this.body, ...this.dotEls]) {
+      part.setAttribute('fill', c.body);
+      if (c.rim && c.rim !== 'none') {
+        part.setAttribute('stroke', c.rim);
+        part.setAttribute('stroke-width', '1.5');
+      } else {
+        part.removeAttribute('stroke');
+        part.removeAttribute('stroke-width');
+      }
     }
     this.visor.setAttribute('fill', c.visor);
     this.eyeL.setAttribute('fill', c.eye);
@@ -964,6 +993,24 @@ export class NpfaceInstance implements Npface {
   private renderShape(): void {
     const L = this.lay;
     this.body.setAttribute('d', this.morphFrom ? pointsPath(L.pts) : this.shapeTo.path);
+    const D = L.dots;
+    while (this.dotEls.length < D.length / 3) {
+      const c = svg('circle', { class: 'npface-dot' });
+      this.dotsG.appendChild(c);
+      this.dotEls.push(c);
+      this.applyColors();
+    }
+    this.dotEls.forEach((c, k) => {
+      const r = D[3 * k + 2] ?? 0;
+      if (r < 0.01) {
+        c.setAttribute('display', 'none');
+        return;
+      }
+      c.removeAttribute('display');
+      c.setAttribute('cx', D[3 * k]!.toFixed(2));
+      c.setAttribute('cy', D[3 * k + 1]!.toFixed(2));
+      c.setAttribute('r', r.toFixed(2));
+    });
     const [x, y, w, h] = L.visor as [number, number, number, number];
     for (const r of [this.visor, this.visorClip]) {
       r.setAttribute('x', x.toFixed(2));

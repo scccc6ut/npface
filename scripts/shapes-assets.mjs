@@ -28,11 +28,12 @@ mkdirSync(resolve('assets'), { recursive: true });
 const C = LIGHT_COLORS;
 const ZH = {
   square: '方形',
+  shield: '盾牌',
+  ghost: '幽灵',
+  cat: '猫咪',
   circle: '圆形',
-  triangle: '三角',
-  hexagon: '六边形',
-  shield: '盾形',
-  diamond: '菱形',
+  drop: '水滴',
+  crown: '皇冠',
 };
 
 /* ---------- static row ---------- */
@@ -41,8 +42,11 @@ function face(name, idp) {
   const [vx, vy, vw, vh] = s.visor;
   const [lx, ly, rx, ry] = s.eyes;
   const rect = `x="${vx}" y="${vy}" width="${vw}" height="${vh}" rx="${vh / 2}"`;
+  let dots = '';
+  for (let k = 0; k < s.dots.length; k += 3)
+    dots += `<circle cx="${s.dots[k]}" cy="${s.dots[k + 1]}" r="${s.dots[k + 2]}" fill="${C.body}"/>`;
   return `<defs><clipPath id="${idp}"><rect ${rect}/></clipPath></defs>
-    <path d="${s.path}" fill="${C.body}"/><rect ${rect} fill="${C.visor}"/>
+    <path d="${s.path}" fill="${C.body}"/>${dots}<rect ${rect} fill="${C.visor}"/>
     <g clip-path="url(#${idp})" fill="${C.eye}">
       <path d="${eyePath(BASE_EYE, false, lx, ly, 0, s.eyeScale)}"/>
       <path d="${eyePath(BASE_EYE, true, rx, ry, 0, s.eyeScale)}"/>
@@ -100,7 +104,8 @@ const step = () => {
   f.tick(clock, 1 / FPS);
 };
 for (let i = 0; i < FPS; i++) step(); // settle
-const frames = { d: [], l: [], r: [], x: [], y: [], w: [], h: [] };
+const dotEl = () => f.el.querySelector('.npface-dot');
+const frames = { d: [], l: [], r: [], x: [], y: [], w: [], h: [], dx: [], dy: [], dr: [] };
 const total = Math.round(LOOP * FPS);
 for (let k = 0; k < total; k++) {
   const t = k / FPS;
@@ -117,6 +122,11 @@ for (let k = 0; k < total; k++) {
   frames.y.push(visor.getAttribute('y'));
   frames.w.push(visor.getAttribute('width'));
   frames.h.push(visor.getAttribute('height'));
+  const dot = dotEl();
+  const shown = dot && dot.getAttribute('display') !== 'none';
+  frames.dx.push(shown ? dot.getAttribute('cx') : '92.2');
+  frames.dy.push(shown ? dot.getAttribute('cy') : '18.9');
+  frames.dr.push(shown ? dot.getAttribute('r') : '0');
 }
 f.destroy();
 
@@ -143,6 +153,7 @@ const rx = frames.h.map((h) => String(+h / 2));
 const morph = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 -6 112 112" width="168" height="168" role="img" aria-label="npface morphing through its face shapes">
 <rect x="-6" y="-6" width="112" height="112" rx="20" fill="#f6f7f2"/>
 <path d="${frames.d[0]}" fill="${C.body}">${anim('d', frames.d)}</path>
+<circle cx="${frames.dx[0]}" cy="${frames.dy[0]}" r="${frames.dr[0]}" fill="${C.body}">${anim('cx', frames.dx)}${anim('cy', frames.dy)}${anim('r', frames.dr)}</circle>
 <rect x="${frames.x[0]}" y="${frames.y[0]}" width="${frames.w[0]}" height="${frames.h[0]}" rx="${rx[0]}" fill="${C.visor}">${anim('x', frames.x)}${anim('y', frames.y)}${anim('width', frames.w)}${anim('height', frames.h)}${anim('rx', rx)}</rect>
 <path d="${frames.l[0]}" fill="${C.eye}">${anim('d', frames.l)}</path>
 <path d="${frames.r[0]}" fill="${C.eye}">${anim('d', frames.r)}</path>
